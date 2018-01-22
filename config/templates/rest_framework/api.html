@@ -1,0 +1,30 @@
+{% extends "rest_framework/base.html" %}
+{% load staticfiles %}
+
+{% block bootstrap_theme %}
+
+    <link rel="stylesheet" href="{% static "api/dist/css/bootstrap/themes/yeti/bootstrap.min.css" %}" type="text/css">
+{% endblock %}
+
+{% block branding %}
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+
+        <a class='navbar-brand' rel="nofollow" href='{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}'>
+            Starter
+        </a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class="active">
+            <a rel="nofollow" href='{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.get_host }}/api/3/'>
+                Browsable API
+            </a>
+        </li>
+    </ul>
+{% endblock %}

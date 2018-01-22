@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Home</a>
+&rsaquo; {{ flatpage.title }}
+</div>
+{% endblock %}
+
+{% block title %}{{ flatpage.title }}{% endblock %}
+
+{% block content %}
+
+<h1>{% trans flatpage.title %}</h1>
+
+    {% block object-tools %}
+        <ul class="object-tools">
+            <li><a href="{% url "admin:flatpages_flatpage_change" flatpage.id %}"
+                   class="viewsitelink">Edit</a></li>
+        </ul>
+    {% endblock %}
+
+    {{  flatpage.content }}
+
+{% endblock %}
