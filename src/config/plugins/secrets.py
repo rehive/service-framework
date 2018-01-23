@@ -9,9 +9,10 @@ if not env_vars_loaded:
         print('Loading keys from file...')
         current_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         parent_directory = os.path.split(current_directory)[0]
+        parent_directory = os.path.split(current_directory)[0]
         print(parent_directory)
 
-        file_path = os.path.join(parent_directory, '.env')
+        file_path = os.path.join(parent_directory, '../.env')
         with open(file_path, 'r') as f:
             output = f.read()
             output = output.split('\n')
