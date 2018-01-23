@@ -4,7 +4,7 @@ from rehive import Rehive, APIException
 from rest_framework import serializers
 from django.db import transaction
 
-from conversion.models import Company, User, Currency
+from {{cookiecutter.app_name}}.models import Company, User, Currency
 
 
 class ActivateSerializer(serializers.Serializer):
