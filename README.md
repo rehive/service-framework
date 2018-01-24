@@ -1,16 +1,16 @@
 <p align="center">
   <img width="64" src="https://avatars2.githubusercontent.com/u/22204821?s=200&v=4" alt="Rehive Logo">
   <h1 align="center">Service Framework</h1>
-  <p align="center">A framework that can be used as a base to build service on Rehive</p>
+  <p align="center">A framework that can be used as a base to build services on Rehive</p>
 </p>
 
 
 ## Features
-- Python 3.6+
-- Django 2.0
+- Python 3.6
+- Django 1.11
 - [Django Rest Framework](http://www.django-rest-framework.org/) integration
-- PostgreSQL 9.6+
-- Postgres running in a self-contained [Docker](https://www.docker.com/) container
+- PostgreSQL 9.6
+- Running in a self-contained [Docker](https://www.docker.com/) containers
 - Automatic deployments to Heroku
  
 
