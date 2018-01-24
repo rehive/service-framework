@@ -7,23 +7,33 @@ Build the required containers
 docker-compose build
 ```
 
-Run the postgres container
+Run the containers in the background
 ```
-docker-compose up -d postgres
+docker-compose up -d
 ```
 
 Migrate all the data to the database
 ```
-./src/manage.py migrate
+docker exec -it {{cookiecutter.app_name}}_webapp_1 ./manage.py migrate
 ```
 
 Setup all the static files
 ```
-./src/manage.py collectstatic
+docker exec -it {{cookiecutter.app_name}}_webapp_1 ./manage.py collectstatic
 ```
 
 ## Local development
-To run the websaerver locally, simply run
+Run the containers in the background
 ```
-./src/management.py runserver
+docker-compose up -d
+```
+
+When done with development, if you would like to stop the containers running
+```
+docker stop {{cookiecutter.app_name}}_webapp_1
+```
+
+When commands need to be run on the webserver, such as running new migrations, if the webserver is running in the background the following command can be used to execute commands on the container
+```
+docker exec -it {{cookiecutter.app_name}}_webapp_1 {{command}}
 ```
