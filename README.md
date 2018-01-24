@@ -14,20 +14,24 @@
 - Automatic deployments to Heroku
  
 
- ## Getting started
- Install [cookiecutter](https://github.com/audreyr/cookiecutter). Further documentation for installation can be found [here](https://cookiecutter.readthedocs.io/en/latest/installation.html#install-cookiecutter).
- ```
- # Pip
- pip install --user cookiecutter
- 
- # Homebrew (Mac OS X only):
- brew install cookiecutter
+## Getting started
+Install [cookiecutter](https://github.com/audreyr/cookiecutter). Further documentation for installation can be found [here](https://cookiecutter.readthedocs.io/en/latest/installation.html#install-cookiecutter).
+```
+# Pip
+pip install --user cookiecutter
 
- # Debian/Ubuntu:
- sudo apt-get install cookiecutter
- ```
+# Homebrew (Mac OS X only):
+brew install cookiecutter
 
- Create your project using the cookie cutter template
- ```
- cookiecutter gh:rehive/service-framework
- ```
+# Debian/Ubuntu:
+sudo apt-get install cookiecutter
+```
+
+Create your project using the cookie cutter template
+```
+# SSH
+cookiecutter git@github.com:rehive/service-framework.git
+
+# HTTPS
+cookiecutter https://github.com/rehive/service-framework.git
+```

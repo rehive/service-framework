@@ -35,5 +35,5 @@ docker stop {{cookiecutter.app_name}}_webapp_1 {{cookiecutter.app_name}}_postgre
 
 When commands need to be run on the webserver, such as running new migrations, if the webserver is running in the background the following command can be used to execute commands on the container
 ```
-docker exec -it {{cookiecutter.app_name}}_webapp_1 {{command}}
+docker exec -it {{cookiecutter.app_name}}_webapp_1 {command}
 ```
