@@ -12,7 +12,7 @@ urlpatterns = (
     # Dashboard
     url(r'^dashboard/', include(admin.site.urls)),
     # Views
-    url(r'^api/', include('{{cookiecutter.app_name}}.urls', namespace='{{cookiecutter.app_name}}')),
+    url(r'^api/', include('{{cookiecutter.module_name}}.urls', namespace='{{cookiecutter.module_name}}')),
 )
 
 # Add debug URL routes

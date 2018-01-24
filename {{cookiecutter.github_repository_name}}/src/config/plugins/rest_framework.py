@@ -8,7 +8,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # ---------------------------------------------------------------------------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        '{{cookiecutter.app_name}}.permissions.IsAuthenticated',
+        '{{cookiecutter.module_name}}.permissions.IsAuthenticated',
     ),
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
 }

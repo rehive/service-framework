@@ -1,5 +1,11 @@
 {
-    "app_name": "service",
-    "description": "A framework that can be used as a base to build service on Rehive"
-    
+    "email": "",
+    "github_username": "",
+    "app_name": "Service",
+    "module_name": "service",
+    "description": "A framework that can be used as a base to build service on Rehive",
+    "github_repository_name": "service-framework",
+    "_copy_without_render": [
+        "*.html"
+    ]
 }

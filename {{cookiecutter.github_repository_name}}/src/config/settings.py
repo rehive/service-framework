@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    '{{cookiecutter.app_name}}',
+    '{{cookiecutter.module_name}}',
 
     'debug_toolbar',
 ]
@@ -103,7 +103,7 @@ if os.environ.get('GCLOUD_USE_STATIC', '') == 'True':
     STATIC_URL = 'https://storage.googleapis.com/' + os.environ.get('GCLOUD_STATIC_BUCKET') + '/'
 
 # STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_DIR, 'var/www/static')
+STATIC_ROOT = os.path.join(PROJECT_DIR, '/var/www/static')
 
 STATICFILES_DIRS = [
     # os.path.join(PROJECT_DIR, "var/www/static"),

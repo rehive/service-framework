@@ -8,13 +8,13 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view, permission_classes
 
-from {{cookiecutter.app_name}}.pagination import ResultsSetPagination
-from {{cookiecutter.app_name}}.authentication import AdminAuthentication
-from {{cookiecutter.app_name}}.serializers import (
+from {{cookiecutter.module_name}}.pagination import ResultsSetPagination
+from {{cookiecutter.module_name}}.authentication import AdminAuthentication
+from {{cookiecutter.module_name}}.serializers import (
     ActivateSerializer, DeactivateSerializer, AdminCompanySerializer,
     CurrencySerializer
 )
-from {{cookiecutter.app_name}}.models import Currency
+from {{cookiecutter.module_name}}.models import Currency
 
 logger = getLogger('django')
 
@@ -25,15 +25,15 @@ def root(request, format=None):
     return Response(
         [
             {'Public': OrderedDict([
-                ('Activate', reverse('{{cookiecutter.app_name}}:activate',
+                ('Activate', reverse('{{cookiecutter.module_name}}:activate',
                     request=request,
                     format=format)),
-                ('Deactivate', reverse('{{cookiecutter.app_name}}:deactivate',
+                ('Deactivate', reverse('{{cookiecutter.module_name}}:deactivate',
                     request=request,
                     format=format))
             ])},
             {'Admins': OrderedDict([
-                ('Company', reverse('{{cookiecutter.app_name}}:admin-company',
+                ('Company', reverse('{{cookiecutter.module_name}}:admin-company',
                     request=request,
                     format=format))
             ])},

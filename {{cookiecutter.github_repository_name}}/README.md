@@ -1,8 +1,29 @@
 # {{cookiecutter.app_name}}
 {{cookiecutter.description}}
 
+## Local setup
+Build the required containers
+```
+docker-compose build
+```
 
-## Requirements
-- [Python 3](https://www.python.org/)
-- Python virtual environment management tool such as [Anaconda](https://store.continuum.io/cshop/anaconda/) or [virtualenv](https://pypi.python.org/pypi/virtualenv)
- 
+Run the postgres container
+```
+docker-compose up -d postgres
+```
+
+Migrate all the data to the database
+```
+./src/manage.py migrate
+```
+
+Setup all the static files
+```
+./src/manage.py collectstatic
+```
+
+## Local development
+To run the websaerver locally, simply run
+```
+./src/management.py runserver
+```

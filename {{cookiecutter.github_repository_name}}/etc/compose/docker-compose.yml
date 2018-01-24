@@ -2,16 +2,24 @@ version: "2.1"
 
 services:
   webapp:
-    extends:
-      service: webapp
-      file: ./docker-services.yml
-    command: /bin/sh -c "gunicorn config.wsgi:application --config file:config/gunicorn.py"
+    image: python:alpine
+    build:
+      context: $PWD
+      dockerfile: $PWD/${DOCKER_FILE}
+    env_file: $PWD/.env
+    restart: always
+    command: /bin/sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:${WEBAPP_PORT} --config file:config/gunicorn.py"
     ports:
-      - 8010:8000
+      - ${WEBAPP_PORT}:${WEBAPP_PORT}
     networks:
       - main
     depends_on:
       - postgres
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
 
   postgres:
     image: postgres:9.6
@@ -21,9 +29,12 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-          main:
-            aliases:
-              - postgres
+      main:
+        aliases:
+          - postgres
+
+  management:
+    image: python:alpine
 
 volumes:
   pgdata:

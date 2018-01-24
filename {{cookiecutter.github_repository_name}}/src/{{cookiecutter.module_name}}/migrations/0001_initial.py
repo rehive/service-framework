@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 ('unit', models.CharField(blank=True, max_length=30, null=True)),
                 ('divisibility', models.IntegerField(default=2)),
                 ('enabled', models.BooleanField(default=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.app_name}}.Company')),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.module_name}}.Company')),
             ],
             options={
                 'abstract': False,
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('identifier', models.UUIDField()),
                 ('token', models.CharField(max_length=200, null=True)),
-                ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.app_name}}.Company')),
+                ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.module_name}}.Company')),
             ],
             options={
                 'abstract': False,
@@ -63,6 +63,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='company',
             name='admin',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='admin_company', to='{{cookiecutter.app_name}}.User'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='admin_company', to='{{cookiecutter.module_name}}.User'),
         ),
     ]
