@@ -30,7 +30,7 @@ docker-compose up -d
 
 When done with development, if you would like to stop the containers running
 ```
-docker stop {{cookiecutter.app_name}}_webapp_1
+docker stop {{cookiecutter.app_name}}_webapp_1 {{cookiecutter.app_name}}_postgres_1
 ```
 
 When commands need to be run on the webserver, such as running new migrations, if the webserver is running in the background the following command can be used to execute commands on the container
