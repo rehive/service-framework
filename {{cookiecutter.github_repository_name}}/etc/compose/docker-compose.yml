@@ -5,12 +5,16 @@ services:
     image: python:alpine
     build:
       context: $PWD
-      dockerfile: $PWD/${DOCKER_FILE}
-    env_file: $PWD/.env
+      dockerfile: $PWD/etc/compose/Dockerfile
+    environment:
+      - DJANGO_SECRET=local
+      - DEBUG=True
+      - SKIP_TASK_QUEUE=False
+      - REHIVE_API_URL=https://rehive.com/api/3/
+      - GCLOUD_USE_STATIC=False
     restart: always
-    command: /bin/sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:${WEBAPP_PORT} --config file:config/gunicorn.py"
     ports:
-      - ${WEBAPP_PORT}:${WEBAPP_PORT}
+      - 8000:8000
     networks:
       - main
     depends_on:
@@ -24,7 +28,7 @@ services:
   postgres:
     image: postgres:9.6
     ports:
-      - '${LOCAL_POSTGRES_PORT}:5432'
+      - '5111:5432'
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
