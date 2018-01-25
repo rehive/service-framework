@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - .:/postgres
+    networks:
+          main:
+            aliases:
+              - postgres
+  web:
+    restart: always
+    build: ./
+    image: web
+    command: python3 manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/code
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - main
+
+networks:
+  main:

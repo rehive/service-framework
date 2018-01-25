@@ -8,11 +8,9 @@ if not env_vars_loaded:
     try:
         print('Loading keys from file...')
         current_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        parent_directory = os.path.split(current_directory)[0]
-        parent_directory = os.path.split(current_directory)[0]
-        print(parent_directory)
 
-        file_path = os.path.join(parent_directory, '../.env')
+        file_path = os.path.join(current_directory, '../.env')
+        print(file_path)
         with open(file_path, 'r') as f:
             output = f.read()
             output = output.split('\n')
@@ -34,4 +32,4 @@ if not env_vars_loaded:
 DEBUG = os.environ.get('DEBUG', '') in ['True', True, 'true']
 
 # secrets
-SECRET_KEY = os.environ.get('DJANGO_SECRET')
+SECRET_KEY = os.environ.get('DJANGO_SECRET', 'local')

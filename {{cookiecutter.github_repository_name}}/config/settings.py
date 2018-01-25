@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 # ---------------------------------------------------------------------------------------------------------------------
 
 MIDDLEWARE_CLASSES = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'config.middleware.HealthCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -97,19 +98,14 @@ USE_TZ = True
 # ---------------------------------------------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/var/www/static/'
-
-if os.environ.get('GCLOUD_USE_STATIC', '') == 'True':
-    STATIC_URL = 'https://storage.googleapis.com/' + os.environ.get('GCLOUD_STATIC_BUCKET') + '/'
-
-# STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_DIR, '/var/www/static/')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'config/static')
 
 STATICFILES_DIRS = [
-    # os.path.join(PROJECT_DIR, "var/www/static"),
-    # '/var/www/static/',
     os.path.join(BASE_DIR, "config/static"),
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'var/www/media')

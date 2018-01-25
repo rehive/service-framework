@@ -12,3 +12,6 @@ requests==2.11.1
 psycopg2==2.7.1
 rehive==1.1.0
 django-filter==1.1.0
+dj-database-url
+whitenoise
+six

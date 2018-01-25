@@ -35,6 +35,9 @@ def root(request, format=None):
             {'Admins': OrderedDict([
                 ('Company', reverse('{{cookiecutter.module_name}}:admin-company',
                     request=request,
+                    format=format)),
+                ('Currencies', reverse('{{cookiecutter.module_name}}:admin-currencies',
+                    request=request,
                     format=format))
             ])},
         ])
@@ -116,11 +119,6 @@ class AdminCurrencyListView(ListAPIView):
     def get_queryset(self):
         company = self.request.user.company
         return Currency.objects.filter(company=company)
-
-    # TODO: Need to be able to refresh enabled currencies.
-    # This should disable currencies that are no longer enabled.
-    # Perhaps a function to POST nothing will run refresh, or instead a
-    # refresh URL?
 
 
 class AdminCurrencyView(GenericAPIView):

@@ -1,0 +1,15 @@
+language: python
+services:
+- docker
+python:
+- '3.6'
+before_script:
+- docker-compose build
+script:
+- docker login --username=_ --password="$HEROKU_AUTH_TOKEN" registry.heroku.com
+- docker tag web registry.heroku.com/crintus-basic-prod/web
+- docker push registry.heroku.com/crintus-basic-prod/web
+notifications:
+  email: true
+cache:
+  pip: true
