@@ -1,10 +1,12 @@
 {
+    "author_name": "",
     "email": "",
-    "github_username": "",
     "app_name": "Service",
-    "module_name": "service",
+    "module_name": "{{cookiecutter.app_name.lower()|replace(' ', '_')|replace('-', '_')}}",
     "description": "A framework that can be used as a base to build service on Rehive",
-    "github_repository_name": "service-framework",
+    "github_repository_name": "{{cookiecutter.module_name.replace('_', '-')}}",
+    "use_travis_ci": "y",
+    "use_heroku": "y",
     "_copy_without_render": [
         "*.html"
     ]

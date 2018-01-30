@@ -11,7 +11,13 @@
 - [Django Rest Framework](http://www.django-rest-framework.org/) integration
 - PostgreSQL 9.6
 - Running in a self-contained [Docker](https://www.docker.com/) containers
-- Automatic deployments to Heroku
+- Automatic deployments to Heroku using Travis CI
+
+**Notes:**
+- The service framework has been set up to work with Travis CI and Heroku for automatic
+deployments. Travis CI is not a requirement for deployments to Heroku to work and is used 
+as a method of automation.
+- If you choose not to use Heroku, you will have to set up deployments yourself.
  
 
 ## Getting started
@@ -35,3 +41,6 @@ cookiecutter git@github.com:rehive/service-framework.git
 # HTTPS
 cookiecutter https://github.com/rehive/service-framework.git
 ```
+
+Run through the command promts and fill in your prejct details.
+Follow the instructions in your newly cloned project for how to setup local development.

@@ -6,9 +6,11 @@ python:
 before_script:
 - docker-compose build
 script:
+- docker-compose run --rm web bash -c "python postgres_ready.py && ./manage.py test"
+after_success:
 - docker login --username=_ --password="$HEROKU_AUTH_TOKEN" registry.heroku.com
-- docker tag web registry.heroku.com/crintus-basic-prod/web
-- docker push registry.heroku.com/crintus-basic-prod/web
+- docker tag web registry.heroku.com/{{cookiecutter.github_repository_name}}/web
+- docker push registry.heroku.com/{{cookiecutter.github_repository_name}}/web
 notifications:
   email: true
 cache:

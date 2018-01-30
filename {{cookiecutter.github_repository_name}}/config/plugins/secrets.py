@@ -32,4 +32,4 @@ if not env_vars_loaded:
 DEBUG = os.environ.get('DEBUG', '') in ['True', True, 'true']
 
 # secrets
-SECRET_KEY = os.environ.get('DJANGO_SECRET', 'local')
+SECRET_KEY = os.environ.get('DJANGO_SECRET', '')

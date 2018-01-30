@@ -1,16 +1,10 @@
 version: '3'
 
 services:
-  db:
+  postgres:
     image: postgres
-    ports:
-      - '5432:5432'
     volumes:
       - .:/postgres
-    networks:
-          main:
-            aliases:
-              - postgres
   web:
     restart: always
     build: ./
@@ -21,9 +15,4 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
-    networks:
-      - main
-
-networks:
-  main:
+      - postgres
