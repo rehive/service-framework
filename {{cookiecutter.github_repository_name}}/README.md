@@ -19,6 +19,15 @@ The [The Hitchhiker’s Guide to Python!](http://docs.python-guide.org/en/latest
 pip install -r requirements.txt
 ```
 
+**Create a .env file**
+Create a .env file in your project's root directory and add the following lines to it:
+```
+DEBUG=True
+LOCAL_POSTGRES_PORT_RANGE="5431:5432"
+```
+This will put your project in development mode and set the postgres ports to 
+something other than the default.
+
 **Run the postgres container in the background**
 ```
 docker-compose up -d postgres
@@ -60,7 +69,7 @@ Travis will deploy the branch to Heroku.
 - Sign up on (Heroku)[https://signup.heroku.com/]
 - Run the following command locally to initialize your project
 ```
-heroku create {{cookiecutter.github_repository_name}} --remote prod && \
+heroku create {{cookiecutter.github_repository_name}} --remote prod --region eu && \
 heroku addons:create heroku-postgresql:hobby-dev --app {{cookiecutter.github_repository_name}} && \
 heroku config:set \
     DJANGO_SECRET=`openssl rand -base64 32` \

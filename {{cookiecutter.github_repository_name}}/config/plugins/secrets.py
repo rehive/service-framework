@@ -23,7 +23,7 @@ if not env_vars_loaded:
         print('environmental variables file not found: {}'.format(file_path))
         pass
 
-    os.environ["POSTGRES_HOST"] = 'localhost'
+    os.environ["POSTGRES_HOST"] = os.environ.get('LOCAL_POSTGRES_HOST', 'localhost')
     os.environ["POSTGRES_PORT"] = os.environ.get('LOCAL_POSTGRES_PORT', '5432')
 
 # Add all project configurations that are stored in env variables:
@@ -32,4 +32,4 @@ if not env_vars_loaded:
 DEBUG = os.environ.get('DEBUG', '') in ['True', True, 'true']
 
 # secrets
-SECRET_KEY = os.environ.get('DJANGO_SECRET', '')
+SECRET_KEY = os.environ.get('DJANGO_SECRET', 'local')

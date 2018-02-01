@@ -4,6 +4,7 @@ services:
 python:
 - '3.6'
 before_script:
+- export LOCAL_POSTGRES_PORT_RANGE=5432
 - docker-compose build
 script:
 - docker-compose run --rm web bash -c "python postgres_ready.py && ./manage.py test"
