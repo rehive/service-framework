@@ -19,15 +19,6 @@ The [The Hitchhiker’s Guide to Python!](http://docs.python-guide.org/en/latest
 pip install -r requirements.txt
 ```
 
-**Create a .env file**
-Create a .env file in your project's root directory and add the following lines to it:
-```
-DEBUG=True
-LOCAL_POSTGRES_PORT_RANGE="5431:5432"
-```
-This will put your project in development mode and set the postgres ports to 
-something other than the default.
-
 **Run the postgres container in the background**
 ```
 docker-compose up -d postgres
@@ -43,6 +34,11 @@ Run `docker ps` to make sure your container is running.
 **Setup all the static files**
 ```
 ./manage.py collectstatic
+```
+
+**Run the webserver to see if all is working**
+```
+./manage.py runserver
 ```
 
 ## Local development
@@ -62,6 +58,10 @@ Pushes to the master branch will trigger a build via Travis. Once the build pass
 Travis will deploy the branch to Heroku.
 
 - Make sure your project is on github
+  - Add the following file, if not already on github. It is excluded in the .gitignore file by default
+  ```
+  git add -f config/static/api/
+  ```
 - Sign up on (travis.org)[https://travis-ci.org/] if you repo is open source or
 (travis.com)[https://travis-ci.com/] for private repos
 - Sync your account
