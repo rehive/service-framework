@@ -1,6 +1,4 @@
 {
-    "author_name": "",
-    "email": "",
     "app_name": "Service",
     "module_name": "{{cookiecutter.app_name.lower()|replace(' ', '_')|replace('-', '_')}}",
     "description": "A framework that can be used as a base to build service on Rehive",
