@@ -6,13 +6,13 @@ services:
     volumes:
       - .:/postgres
     ports:
-      - "${LOCAL_POSTGRES_PORT_RANGE}"
+      - ${LOCAL_POSTGRES_PORT_RANGE}
   web:
     restart: always
     build: ./
     image: web
     environment:
-      - DJANGO_SECRET_KEY=local
+      - DJANGO_SECRET=local
       - REHIVE_API_URL=https://rehive.com/api/3/
     command: python3 manage.py runserver 0.0.0.0:8080
     volumes:

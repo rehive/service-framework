@@ -16,7 +16,7 @@ if not env_vars_loaded:
             output = output.split('\n')
 
         for var in output:
-            if var:
+            if var and not var.startswith('#'):
                 k, v = var.split('=', maxsplit=1)
                 os.environ.setdefault(k, v)
     except FileNotFoundError:
@@ -24,7 +24,7 @@ if not env_vars_loaded:
         pass
 
     os.environ["POSTGRES_HOST"] = os.environ.get('LOCAL_POSTGRES_HOST', 'localhost')
-    os.environ["POSTGRES_PORT"] = os.environ.get('LOCAL_POSTGRES_PORT', '5432')
+    os.environ["POSTGRES_PORT"] = os.environ.get('LOCAL_POSTGRES_REMOTE_PORT', '5432')
 
 # Add all project configurations that are stored in env variables:
 
