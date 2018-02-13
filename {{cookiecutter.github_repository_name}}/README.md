@@ -67,6 +67,10 @@ Travis will deploy the branch to Heroku.
 - Sync your account
 - Turn on the switch for your repository
 - Sign up on (Heroku)[https://signup.heroku.com/]
+- Login and authenticate your heroku-cli so that you can use the heroku-cli to create our production app.
+```
+heroku login
+```
 - Run the following command locally to initialize your project
 ```
 heroku create {{cookiecutter.github_repository_name}} --remote prod --region eu && \

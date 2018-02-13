@@ -14,6 +14,7 @@ services:
     environment:
       - DJANGO_SECRET=local
       - REHIVE_API_URL=https://rehive.com/api/3/
+      - LOCAL_POSTGRES_HOST=postgres
     command: python3 manage.py runserver 0.0.0.0:8080
     volumes:
       - .:/code

@@ -7,7 +7,7 @@ before_script:
 - export LOCAL_POSTGRES_PORT_RANGE=5432
 - docker-compose build
 script:
-- docker-compose run --rm web bash -c "python postgres_ready.py && ./manage.py test"
+- docker-compose run --rm web bash -c "python postgres_ready.py && ./manage.py migrate && ./manage.py test"
 after_success:
 - docker login --username=_ --password="$HEROKU_AUTH_TOKEN" registry.heroku.com
 - docker tag web registry.heroku.com/{{cookiecutter.github_repository_name}}/web
