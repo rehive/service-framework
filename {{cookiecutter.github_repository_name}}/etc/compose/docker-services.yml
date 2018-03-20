@@ -1,0 +1,13 @@
+version: "2.1"
+
+services:
+  webapp:
+    image: ${IMAGE_NAME}:${VERSION}
+    user: nobody
+    env_file: $PWD/.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    restart: always

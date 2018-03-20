@@ -1,0 +1,18 @@
+project_name: concierge
+docker_image: gcr.io/rehive-services/concierge
+venv_python: ~/anaconda/envs/zapgo-core/bin/python3.5
+helm_chart: rehive/rehive-service
+helm_chart_version: 0.1.32
+configs:
+    staging:
+      project: rehive-services
+      cluster: staging
+      namespace: concierge-staging
+      helm_values_path: ./etc/helm/staging/values.yaml
+      env_dir: ./etc/helm/staging/
+    production:
+      project: rehive-services
+      cluster: production
+      namespace: concierge
+      helm_values_path: ./etc/helm/production/values.yaml
+      env_dir: ./etc/helm/production/
