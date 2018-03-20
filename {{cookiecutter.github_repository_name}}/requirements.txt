@@ -10,7 +10,7 @@ msgpack-python==0.4.7
 phonenumbers==7.4.0
 requests==2.11.1
 psycopg2==2.7.1
-rehive==1.1.0
+rehive==1.1.5
 django-filter==1.1.0
 dj-database-url
 whitenoise
