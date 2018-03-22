@@ -58,7 +58,6 @@ def remove_gcould_k8s_files():
     assert 'src' in os.listdir(PROJECT_DIRECTORY)
     src_dir = os.path.join(PROJECT_DIRECTORY, 'src')
     files = os.listdir(src_dir)
-    import pdb; pdb.set_trace()
     for f in files:
         shutil.move(os.path.join(src_dir, f), PROJECT_DIRECTORY)
     assert 'manage.py' in os.listdir(PROJECT_DIRECTORY)
