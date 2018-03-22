@@ -54,13 +54,15 @@ def remove_gcould_k8s_files():
     Move all files out of src/ to the PROJECT_DIR for heroku and travis 
     deployment setup.
     """
-    os.rmdir(os.path.join(PROJECT_DIRECTORY, 'etc'))
+    shutil.rmtree(os.path.join(PROJECT_DIRECTORY, 'etc'))
     assert 'src' in os.listdir(PROJECT_DIRECTORY)
-    files = os.listdir(os.path.join(PROJECT_DIRECTORY, 'src'))
+    src_dir = os.path.join(PROJECT_DIRECTORY, 'src')
+    files = os.listdir(src_dir)
+    import pdb; pdb.set_trace()
     for f in files:
-        shutil.move(f, PROJECT_DIRECTORY)
+        shutil.move(os.path.join(src_dir, f), PROJECT_DIRECTORY)
     assert 'manage.py' in os.listdir(PROJECT_DIRECTORY)
-    os.rmdir(os.path.join(PROJECT_DIRECTORY, 'src'))
+    os.rmdir(src_dir)
 
 
 # Create django secret
