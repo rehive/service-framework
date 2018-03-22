@@ -9,7 +9,7 @@ deployment:
       cpu: 500m
   command: "['gunicorn', 'config.wsgi:application', '--config', 'file:config/gunicorn.py']"
 image:
-  repository: gcr.io/rehive-services/concierge
+  repository: gcr.io/rehive-services/{{cookiecutter.github_repository_name}}
   tag: latest
   pullPolicy: Always
 service:

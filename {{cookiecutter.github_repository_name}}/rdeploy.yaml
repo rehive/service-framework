@@ -1,5 +1,5 @@
-project_name: concierge
-docker_image: gcr.io/rehive-services/concierge
+project_name: {{cookiecutter.github_repository_name}}
+docker_image: gcr.io/rehive-services/{{cookiecutter.github_repository_name}}
 venv_python: ~/anaconda/envs/zapgo-core/bin/python3.5
 helm_chart: rehive/rehive-service
 helm_chart_version: 0.1.32
@@ -7,12 +7,12 @@ configs:
     staging:
       project: rehive-services
       cluster: staging
-      namespace: concierge-staging
+      namespace: {{cookiecutter.github_repository_name}}-staging
       helm_values_path: ./etc/helm/staging/values.yaml
       env_dir: ./etc/helm/staging/
     production:
       project: rehive-services
       cluster: production
-      namespace: concierge
+      namespace: {{cookiecutter.github_repository_name}}
       helm_values_path: ./etc/helm/production/values.yaml
       env_dir: ./etc/helm/production/
