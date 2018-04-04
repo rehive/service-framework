@@ -1,0 +1,32 @@
+version: "2.1"
+
+services:
+  webapp:
+    extends:
+      service: webapp
+      file: ./docker-services.yml
+    command: /bin/sh -c "gunicorn config.wsgi:application --config file:config/gunicorn.py"
+    ports:
+      - 8010:8000
+    networks:
+      - main
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:9.6
+    ports:
+      - '${LOCAL_POSTGRES_PORT}:5432'
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+          main:
+            aliases:
+              - postgres
+
+volumes:
+  pgdata:
+
+networks:
+  main:

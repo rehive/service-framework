@@ -1,0 +1,55 @@
+# Default values for rehive-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+deployment:
+  replicaCount: 3
+  resources:
+    requests:
+      memory: 450M
+      cpu: 500m
+  command: "['gunicorn', 'config.wsgi:application', '--config', 'file:config/gunicorn.py']"
+image:
+  repository: gcr.io/rehive-services/{{cookiecutter.github_repository_name}}
+  tag: latest
+  pullPolicy: Always
+service:
+  name: nginx
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8000
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 8000
+    initialDelaySeconds: 10
+    timeoutSeconds: 2
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /readiness
+      port: 8000
+    initialDelaySeconds: 10
+    timeoutSeconds: 2
+    periodSeconds: 10
+ingress:
+  enabled: true
+  hosts:
+    - {{cookiecutter.github_repository_name}}.s.services.rehive.io
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: "true"
+  tls:
+    - hosts:
+      - {{cookiecutter.github_repository_name}}.s.services.rehive.io
+      secretName: {{cookiecutter.github_repository_name}}-tls
+  hosts:
+    - {{cookiecutter.github_repository_name}}.s.services.rehive.io
+postgres:
+  enabled: true
+  user: admin
+  host: patroni-{{cookiecutter.github_repository_name}}-patroni.{{cookiecutter.github_repository_name}}-staging.svc.cluster.local
+  port: "5432"
+  secret:
+    name: patroni-{{cookiecutter.github_repository_name}}-patroni
+    key: password-admin
+workersEnabled: false

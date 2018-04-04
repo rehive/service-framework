@@ -1,0 +1,10 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+            'build',
+            '-t', '$_IMAGE:latest',
+            '-t', '$_IMAGE:$TAG_NAME',
+            '-f', 'etc/docker/Dockerfile',
+            '.'
+        ]
+images: ['$_IMAGE']
