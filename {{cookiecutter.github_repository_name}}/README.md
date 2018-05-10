@@ -53,7 +53,7 @@ docker-compose up -d postgres
 ```
 
 ## Deployments
-Deployements are automated using Travis CI and Heroku.
+Deployements are automated using Travis CI, Heroku and gcloud.
 Pushes to the master branch will trigger a build via Travis. Once the build passes,
 Travis will deploy the branch to Heroku.
 
@@ -85,3 +85,25 @@ heroku config:set \
 travis encrypt HEROKU_AUTH_TOKEN="$(heroku auth:token)" --add
 ``` 
 - Commit and push the changes to master to trigger the first build
+
+Google cloud:
+Gcloud login
+```
+glcoud auth loging
+```
+Create namespace
+```
+inv create_namespace staging
+```
+Build cloud image
+```
+inv cloudbuild_initial staging
+```
+Upload secrets
+```
+inv upload_secrets staging
+```
+Install
+```
+inv install staging
+```
