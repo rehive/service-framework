@@ -1,14 +1,14 @@
 {
-    "app_name": "Service",
+    "project_name": "Service Framework",
+    "app_name": "{{ cookiecutter.project_name.split()[1:].join()|replace(' ', '_')|replace('-', '_') }}",
     "description": "A framework that can be used as a base to build service on Rehive",
-    "module_name": "{{cookiecutter.app_name.lower()|replace(' ', '_')|replace('-', '_')}}",
-    "github_repository_name": "{{cookiecutter.app_name.lower()|replace(' ', '-')}}",
+    "module_name": "service_{{ cookiecutter.app_name }}",
+    "github_repository_name": "service-{{ cookiecutter.app_name }}",
     "server_infrastructure": [
         "Heroku + TravisCI",
         "GCloud + Kubernetes"
     ],
     "_copy_without_render": [
-        "*.html",
-        "tasks.py"
+        "*.html"
     ]
 }

@@ -1,20 +1,44 @@
-# Default values for rehive-service.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 deployment:
+  command: '[''gunicorn'', ''config.wsgi:application'', ''--config'', ''file:config/gunicorn.py'']'
   replicaCount: 3
   resources:
-    requests:
-      memory: 450M
+    limits:
       cpu: 500m
-  command: "['gunicorn', 'config.wsgi:application', '--config', 'file:config/gunicorn.py']"
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 450M
 image:
-  repository: gcr.io/rehive-services/{{cookiecutter.github_repository_name}}
-  tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
+  repository: gcr.io/rehive-services/{{cookiecutter.app_name}}
+  tag: 0.1.2
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  enabled: true
+  hosts:
+  - {{cookiecutter.app_name}}.services.rehive.io
+  tls:
+  - hosts:
+    - {{cookiecutter.app_name}}.services.rehive.io
+    secretName: {{cookiecutter.app_name}}-tls
+postgres:
+  enabled: true
+  host: patroni-{{cookiecutter.app_name}}-patroni.{{cookiecutter.app_name}}.svc.cluster.local
+  port: 5432
+  secret:
+    key: password-admin
+    name: patroni-{{cookiecutter.app_name}}-patroni
+  user: webapp
+rabbitmq:
+  enabled: true
+  host: rabbitmq-ha-{{cookiecutter.app_name}}.{{cookiecutter.app_name}}.svc.cluster.local
+  port: 5672
+  secret:
+    name: rabbitmq-ha-{{cookiecutter.app_name}}
+    key: rabbitmq-password
 service:
-  name: nginx
-  type: ClusterIP
   externalPort: 80
   internalPort: 8000
   livenessProbe:
@@ -22,33 +46,38 @@ service:
       path: /healthz
       port: 8000
     initialDelaySeconds: 10
-    timeoutSeconds: 2
     periodSeconds: 10
+    timeoutSeconds: 2
+  name: nginx
   readinessProbe:
     httpGet:
       path: /readiness
       port: 8000
     initialDelaySeconds: 10
-    timeoutSeconds: 2
     periodSeconds: 10
-ingress:
-  enabled: true
-  hosts:
-    - {{cookiecutter.github_repository_name}}.services.rehive.io
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    kubernetes.io/tls-acme: "true"
-  tls:
-    - hosts:
-      - {{cookiecutter.github_repository_name}}.services.rehive.io
-      secretName: {{cookiecutter.github_repository_name}}-tls
-  hosts:
-    - {{cookiecutter.github_repository_name}}.services.rehive.io
-postgres:
-  enabled: true
-  host: patroni-{{cookiecutter.github_repository_name}}-patroni.{{cookiecutter.github_repository_name}}.svc.cluster.local
-  port: "5432"
-  secret:
-    name: patroni-{{cookiecutter.github_repository_name}}-patroni
-    key: password-admin
-workersEnabled: false
+    timeoutSeconds: 2
+  type: NodePort
+workers:
+  - name: worker-general
+    internalPort: 8000
+    replicaCount: 1
+    command: "['celery', '-A', 'config.celery', 'worker', '--loglevel=INFO', '--concurrency=1', '--without-gossip', '--without-mingle', '--without-heartbeat', '-Q', 'general-{{cookiecutter.app_name}}']"
+    resources:
+      requests:
+        memory: 1024M
+        cpu: 266m
+      limits:
+        memory: 1024M
+        cpu: 266m
+  - name: scheduler
+    internalPort: 8000
+    replicaCount: 1
+    command: "['celery', '-A', 'config.celery', 'worker', '--beat', '--loglevel=INFO', '--pidfile=', '--concurrency=1','--without-gossip', '--without-mingle', '--without-heartbeat',  '-Q', 'scheduler-{{cookiecutter.app_name}}']"
+    resources:
+      requests:
+        memory: 256M
+        cpu: 66m
+      limits:
+        memory: 256M
+        cpu: 66m
+workersEnabled: true

@@ -51,7 +51,7 @@ def remove_heroku_travis_files():
 
 def remove_gcould_k8s_files():
     """
-    Move all files out of src/ to the PROJECT_DIR for heroku and travis 
+    Move all files out of src/ to the PROJECT_DIR for heroku and travis
     deployment setup.
     """
     shutil.rmtree(os.path.join(PROJECT_DIRECTORY, 'etc'))

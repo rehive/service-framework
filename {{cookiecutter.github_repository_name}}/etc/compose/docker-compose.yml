@@ -13,6 +13,28 @@ services:
     depends_on:
       - postgres
 
+  worker_general:
+    extends:
+       service: webapp
+       file: ./docker-services.yml
+    command: /bin/sh -c "celery -A config.celery worker --loglevel=INFO --concurrency=1 -Q general-${CELERY_ID}"
+    networks:
+      - main
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  scheduler:
+    extends:
+       service: webapp
+       file: ./docker-services.yml
+    command: /bin/sh -c "celery -A config.celery worker --beat --loglevel=INFO --pidfile= --concurrency=1 -Q dummy-queue-${CELERY_ID}"
+    networks:
+      - main
+    depends_on:
+      - rabbitmq
+      - postgres
+
   postgres:
     image: postgres:9.6
     ports:
@@ -24,6 +46,16 @@ services:
           main:
             aliases:
               - postgres
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      main:
+        aliases:
+          - rabbitmq
 
 volumes:
   pgdata:
