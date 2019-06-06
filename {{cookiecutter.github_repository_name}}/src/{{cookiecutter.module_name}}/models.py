@@ -41,16 +41,3 @@ class User(DateModel):
 
     def __str__(self):
         return str(self.identifier)
-
-
-class Currency(DateModel):
-    company = models.ForeignKey('{{cookiecutter.module_name}}.Company')
-    code = models.CharField(max_length=12, db_index=True)
-    description = models.CharField(max_length=50, null=True, blank=True)
-    symbol = models.CharField(max_length=30, null=True, blank=True)
-    unit = models.CharField(max_length=30, null=True, blank=True)
-    divisibility = models.IntegerField(default=2)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return str(self.code)

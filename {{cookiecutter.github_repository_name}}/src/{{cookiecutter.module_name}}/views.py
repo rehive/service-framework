@@ -11,10 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 from {{cookiecutter.module_name}}.pagination import ResultsSetPagination
 from {{cookiecutter.module_name}}.authentication import AdminAuthentication
 from {{cookiecutter.module_name}}.serializers import (
-    ActivateSerializer, DeactivateSerializer, AdminCompanySerializer,
-    CurrencySerializer
+    ActivateSerializer, DeactivateSerializer, AdminCompanySerializer
 )
-from {{cookiecutter.module_name}}.models import Currency
 
 logger = getLogger('django')
 
@@ -34,9 +32,6 @@ def root(request, format=None):
             ])},
             {'Admins': OrderedDict([
                 ('Company', reverse('{{cookiecutter.module_name}}:admin-company',
-                    request=request,
-                    format=format)),
-                ('Currencies', reverse('{{cookiecutter.module_name}}:admin-currencies',
                     request=request,
                     format=format))
             ])},
@@ -105,35 +100,4 @@ class AdminCompanyView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         company = request.user.company
         serializer = self.get_serializer(company)
-        return Response({'status': 'success', 'data': serializer.data})
-
-
-class AdminCurrencyListView(ListAPIView):
-    allowed_methods = ('GET',)
-    pagination_class = ResultsSetPagination
-    serializer_class = CurrencySerializer
-    authentication_classes = (AdminAuthentication,)
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('code',)
-
-    def get_queryset(self):
-        company = self.request.user.company
-        return Currency.objects.filter(company=company)
-
-
-class AdminCurrencyView(GenericAPIView):
-    allowed_methods = ('GET',)
-    serializer_class = CurrencySerializer
-    authentication_classes = (AdminAuthentication,)
-
-    def get(self, request, *args, **kwargs):
-        company = request.user.company
-        code = kwargs['code']
-
-        try:
-            currency = Currency.objects.get(company=company, code__iexact=code)
-        except Currency.DoesNotExist:
-            raise exceptions.NotFound()
-
-        serializer = self.get_serializer(currency)
         return Response({'status': 'success', 'data': serializer.data})

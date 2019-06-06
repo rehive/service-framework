@@ -10,9 +10,7 @@ urlpatterns = (
     url(r'^deactivate/$', views.DeactivateView.as_view(), name='deactivate'),
 
     # Admin
-    url(r'^admin/company/$', views.AdminCompanyView.as_view(), name='admin-company'),
-    url(r'^admin/currencies/$', views.AdminCurrencyListView.as_view(), name='admin-currencies'),
-    url(r'^admin/currencies/(?P<code>(\w+))/$', views.AdminCurrencyView.as_view(), name='admin-currencies-view'),
+    url(r'^admin/company/$', views.AdminCompanyView.as_view(), name='admin-company')
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

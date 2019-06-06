@@ -4,7 +4,7 @@ from rehive import Rehive, APIException
 from rest_framework import serializers
 from django.db import transaction
 
-from {{cookiecutter.module_name}}.models import Company, User, Currency
+from {{cookiecutter.module_name}}.models import Company, User
 
 
 class ActivateSerializer(serializers.Serializer):
@@ -34,23 +34,17 @@ class ActivateSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"token": ["Company already activated."]})
 
-        try:
-            currencies = rehive.company.currencies.get()
-        except APIException:
-            raise serializers.ValidationError({"non_field_errors":
-                ["Unkown error."]})
-
         validated_data['user'] = user
         validated_data['company'] = company
-        validated_data['currencies'] = currencies
 
         return validated_data
 
+
+    @transaction.atomic
     def create(self, validated_data):
         token = validated_data.get('token')
         rehive_user = validated_data.get('user')
         rehive_company = validated_data.get('company')
-        currencies = validated_data.get('currencies')
 
         with transaction.atomic():
             user = User.objects.create(token=token,
@@ -62,11 +56,6 @@ class ActivateSerializer(serializers.Serializer):
 
             user.company = company
             user.save()
-
-            # Add currencies to company automatically.
-            for kwargs in currencies:
-                kwargs['company'] = company
-                currency = Currency.objects.create(**kwargs)
 
             return company
 
@@ -108,12 +97,3 @@ class AdminCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ('identifier', 'secret', 'name',)
-
-
-class CurrencySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Currency
-        fields = (
-            'code', 'description', 'symbol', 'unit', 'divisibility', 'enabled',
-        )
