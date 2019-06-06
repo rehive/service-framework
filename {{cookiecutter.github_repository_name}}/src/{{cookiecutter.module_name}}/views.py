@@ -66,6 +66,11 @@ class ListAPIView(ListModelMixin,
 
 
 class ActivateView(GenericAPIView):
+    """
+    Activate a company in the {{cookiecutter.project_name}}.
+    A secret key is created on activation.
+    """
+
     allowed_methods = ('POST',)
     permission_classes = (AllowAny, )
     serializer_class = ActivateSerializer
@@ -73,14 +78,14 @@ class ActivateView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {'status': 'success', 'data': serializer.data},
-            status=status.HTTP_201_CREATED
-        )
+        instance = serializer.save()
+        return Response({'status': 'success', 'data': serializer.data})
 
 
 class DeactivateView(GenericAPIView):
+    """
+    Dectivate a company in the {{cookiecutter.project_name}}.
+    """
     allowed_methods = ('POST',)
     permission_classes = (AllowAny, )
     serializer_class = DeactivateSerializer
@@ -93,6 +98,11 @@ class DeactivateView(GenericAPIView):
 
 
 class AdminCompanyView(GenericAPIView):
+    """
+    View and update company. Authenticates requests using a token in the
+    Authorization header.
+    """
+
     allowed_methods = ('GET', 'PATCH',)
     serializer_class = AdminCompanySerializer
     authentication_classes = (AdminAuthentication,)
@@ -100,4 +110,11 @@ class AdminCompanyView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         company = request.user.company
         serializer = self.get_serializer(company)
+        return Response({'status': 'success', 'data': serializer.data})
+
+    def patch(self, request, *args, **kwargs):
+        company = request.user.company
+        serializer = self.get_serializer(company, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
         return Response({'status': 'success', 'data': serializer.data})
