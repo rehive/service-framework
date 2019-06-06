@@ -48,6 +48,7 @@ class ActivateSerializer(serializers.Serializer):
 
         return validated_data
 
+    @transaction.atomic
     def create(self, validated_data):
         token = validated_data.get('token')
         rehive_user = validated_data.get('user')
@@ -60,16 +61,17 @@ class ActivateSerializer(serializers.Serializer):
             )
         # Ceate a new company and activate it.
         except Company.DoesNotExist:
-            user = User.objects.create(
-                token=token,
-                identifier=uuid.UUID(rehive_user['id'])
-            )
-            company = Company.objects.create(
-                admin=user,
-                identifier=rehive_company.get('id'),
-                email=rehive_company.get('email'),
-                name=rehive_company.get('name')
-            )
+            with transaction.atomic():
+                user = User.objects.create(
+                    token=token,
+                    identifier=uuid.UUID(rehive_user['id'])
+                )
+                company = Company.objects.create(
+                    admin=user,
+                    identifier=rehive_company.get('id'),
+                    email=rehive_company.get('email'),
+                    name=rehive_company.get('name')
+                )
             user.company = company
             user.save()
         else:
