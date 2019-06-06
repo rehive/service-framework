@@ -17,27 +17,6 @@ from {{cookiecutter.module_name}}.serializers import (
 logger = getLogger('django')
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny, ])
-def root(request, format=None):
-    return Response(
-        [
-            {'Public': OrderedDict([
-                ('Activate', reverse('{{cookiecutter.module_name}}:activate',
-                    request=request,
-                    format=format)),
-                ('Deactivate', reverse('{{cookiecutter.module_name}}:deactivate',
-                    request=request,
-                    format=format))
-            ])},
-            {'Admins': OrderedDict([
-                ('Company', reverse('{{cookiecutter.module_name}}:admin-company',
-                    request=request,
-                    format=format))
-            ])},
-        ])
-
-
 class ListModelMixin(object):
     """
     List a queryset.

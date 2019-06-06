@@ -5,7 +5,6 @@ from . import views
 
 urlpatterns = (
     # Public
-    url(r'^$', views.root),
     url(r'^activate/$', views.ActivateView.as_view(), name='activate'),
     url(r'^deactivate/$', views.DeactivateView.as_view(), name='deactivate'),
 

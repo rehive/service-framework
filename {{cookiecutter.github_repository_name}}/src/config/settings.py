@@ -9,6 +9,7 @@ import os
 
 from .plugins.secrets import *
 from .plugins.rest_framework import *
+from .plugins.yasg import *
 from .plugins.database import *
 
 
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     '{{cookiecutter.module_name}}',
 
     'debug_toolbar',
+    'drf_yasg',
 ]
 
 # Middleware
