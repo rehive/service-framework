@@ -28,7 +28,6 @@ class Company(DateModel):
         related_name='admin_company')
     secret = models.UUIDField()
     name = models.CharField(max_length=100, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
     active = models.BooleanField(default=True, blank=False, null=False)
 
     def __str__(self):
@@ -43,14 +42,6 @@ class Company(DateModel):
 
         return super(Company, self).save(*args, **kwargs)
 
-    def get_from_email(self):
-        if self.email and self.name:
-            return "{name} <{email}>".format(name=self.name,
-                email=self.email)
-        elif self.email:
-            return self.email
-        else:
-            return os.environ.get('DEFAULT_FROM_EMAIL')
 
 class User(DateModel):
     identifier = models.UUIDField(unique=True, db_index=True)

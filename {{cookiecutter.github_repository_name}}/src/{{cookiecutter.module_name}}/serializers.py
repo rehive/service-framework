@@ -16,7 +16,6 @@ class ActivateSerializer(serializers.Serializer):
     token = serializers.CharField(write_only=True)
     id = serializers.CharField(source='identifier', read_only=True)
     name = serializers.CharField(read_only=True)
-    email = serializers.CharField(read_only=True)
     secret = serializers.UUIDField(read_only=True)
 
     def validate(self, validated_data):
@@ -69,7 +68,6 @@ class ActivateSerializer(serializers.Serializer):
                 company = Company.objects.create(
                     admin=user,
                     identifier=rehive_company.get('id'),
-                    email=rehive_company.get('email'),
                     name=rehive_company.get('name')
                 )
             user.company = company
@@ -127,12 +125,11 @@ class AdminCompanySerializer(serializers.ModelSerializer):
     """
     id = serializers.CharField(source='identifier', read_only=True)
     secret = serializers.UUIDField(read_only=True)
-    email = serializers.CharField()
     name = serializers.CharField()
 
     class Meta:
         model = Company
-        fields = ('id', 'identifier', 'secret', 'email', 'name',)
+        fields = ('id', 'identifier', 'secret', 'name',)
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():
