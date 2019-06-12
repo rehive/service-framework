@@ -4,20 +4,26 @@ from rehive import Rehive, APIException
 from rest_framework import serializers
 from django.db import transaction
 
-from {{cookiecutter.module_name}}.models import Company, User, Currency
+from {{cookiecutter.module_name}}.models import Company, User
 
 
 class ActivateSerializer(serializers.Serializer):
+    """
+    Serialize the activation data, should be a token that represents an admin
+    user.
+    """
+
     token = serializers.CharField(write_only=True)
-    identifier = serializers.CharField(read_only=True)
+    id = serializers.CharField(source='identifier', read_only=True)
     name = serializers.CharField(read_only=True)
     secret = serializers.UUIDField(read_only=True)
 
     def validate(self, validated_data):
-        rehive = Rehive(validated_data.get('token'))
+        token = validated_data.get('token')
+        rehive = Rehive(token)
 
         try:
-            user = rehive.user.get()
+            user = rehive.auth.tokens.verify(token)
             groups = [g['name'] for g in user['groups']]
             if len(set(["admin", "service"]).intersection(groups)) <= 0:
                 raise serializers.ValidationError(
@@ -30,55 +36,64 @@ class ActivateSerializer(serializers.Serializer):
         except APIException:
             raise serializers.ValidationError({"token": ["Invalid company."]})
 
-        if Company.objects.filter(identifier=company['identifier']).exists():
+        if Company.objects.filter(
+                identifier=company['id'],
+                active=True).exists():
             raise serializers.ValidationError(
                 {"token": ["Company already activated."]})
 
-        try:
-            currencies = rehive.company.currencies.get()
-        except APIException:
-            raise serializers.ValidationError({"non_field_errors":
-                ["Unkown error."]})
-
         validated_data['user'] = user
         validated_data['company'] = company
-        validated_data['currencies'] = currencies
 
         return validated_data
 
+    @transaction.atomic
     def create(self, validated_data):
         token = validated_data.get('token')
         rehive_user = validated_data.get('user')
         rehive_company = validated_data.get('company')
-        currencies = validated_data.get('currencies')
 
-        with transaction.atomic():
-            user = User.objects.create(token=token,
-                identifier=uuid.UUID(rehive_user['identifier']).hex)
-
-            company = Company.objects.create(admin=user,
-                identifier=rehive_company.get('identifier'),
-                name=rehive_company.get('name'))
-
+        # Activate an existing company.
+        try:
+            company = Company.objects.get(
+                identifier=rehive_company.get('id')
+            )
+        # Ceate a new company and activate it.
+        except Company.DoesNotExist:
+            with transaction.atomic():
+                user = User.objects.create(
+                    token=token,
+                    identifier=uuid.UUID(rehive_user['id'])
+                )
+                company = Company.objects.create(
+                    admin=user,
+                    identifier=rehive_company.get('id'),
+                    name=rehive_company.get('name')
+                )
             user.company = company
             user.save()
+        else:
+            company.admin.token = token
+            company.active = True
+            company.admin.save()
+            company.save()
 
-            # Add currencies to company automatically.
-            for kwargs in currencies:
-                kwargs['company'] = company
-                currency = Currency.objects.create(**kwargs)
-
-            return company
+        return company
 
 
 class DeactivateSerializer(serializers.Serializer):
+    """
+    Serialize the deactivation data, should be a token that represents an admin
+    user.
+    """
     token = serializers.CharField(write_only=True)
 
     def validate(self, validated_data):
-        rehive = Rehive(validated_data.get('token'))
+        token = validated_data.get('token')
+        rehive = Rehive(token)
 
         try:
-            user = rehive.user.get()
+            user = rehive.auth.tokens.verify(token)
             groups = [g['name'] for g in user['groups']]
             if len(set(["admin", "service"]).intersection(groups)) <= 0:
                 raise serializers.ValidationError(
@@ -96,24 +111,29 @@ class DeactivateSerializer(serializers.Serializer):
         return validated_data
 
     def delete(self):
-        # Cascade delete to rmeove the company and other children entities.
-        self.validated_data['company'].admin.delete()
+        company = self.validated_data['company']
+        company.active = False
+        company.admin.token = None
+        company.save()
+        company.admin.save()
+
 
 
 class AdminCompanySerializer(serializers.ModelSerializer):
-    identifier = serializers.CharField(read_only=True)
+    """
+    Serialize company, update and delete.
+    """
+    id = serializers.CharField(source='identifier', read_only=True)
     secret = serializers.UUIDField(read_only=True)
-    name = serializers.CharField(read_only=True)
+    name = serializers.CharField()
 
     class Meta:
         model = Company
-        fields = ('identifier', 'secret', 'name',)
+        fields = ('id', 'identifier', 'secret', 'name',)
 
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
 
-class CurrencySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Currency
-        fields = (
-            'code', 'description', 'symbol', 'unit', 'divisibility', 'enabled',
-        )
+        instance.save()
+        return instance

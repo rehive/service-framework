@@ -41,22 +41,31 @@ class AdminAuthentication(HeaderAuthentication):
         rehive = Rehive(token)
 
         try:
-            user = rehive.user.get()
+            user = rehive.auth.tokens.verify(token)
             groups = [g['name'] for g in user['groups']]
             if len(set(["admin", "service"]).intersection(groups)) <= 0:
                 raise exceptions.AuthenticationFailed(_('Invalid admin user'))
-        except APIException:
-            raise exceptions.AuthenticationFailed(_('Invalid user'))
+        except APIException as exc:
+            if (hasattr(exc, 'data')):
+                message = exc.data['message']
+            else:
+                message = _('Invalid user')
+
+            raise exceptions.AuthenticationFailed(message)
 
         try:
-            company = Company.objects.get(identifier=user['company'])
+            company = Company.objects.get(
+                identifier=user['company'],
+                active=True
+            )
         except Company.DoesNotExist:
             raise exceptions.AuthenticationFailed(
                 _("Inactive company. Please activate the company first."))
 
         user, created = User.objects.get_or_create(
-            identifier=uuid.UUID(user['identifier']).hex,
-            company=company)
+            identifier=uuid.UUID(user['id']),
+            company=company
+        )
 
         # Return the permanent token for (not the request token) the company.
         return user, company.admin.token
@@ -74,17 +83,26 @@ class UserAuthentication(HeaderAuthentication):
         rehive = Rehive(token)
 
         try:
-            user = rehive.user.get()
-        except APIException:
-            raise exceptions.AuthenticationFailed(_('Invalid user'))
+            user = rehive.auth.tokens.verify(token)
+        except APIException as exc:
+            if (hasattr(exc, 'data')):
+                message = exc.data['message']
+            else:
+                message = _('Invalid user')
+
+            raise exceptions.AuthenticationFailed(message)
 
         try:
-            company = Company.objects.get(identifier=user['company'])
+            company = Company.objects.get(
+                identifier=user['company'],
+                active=True
+            )
         except Company.DoesNotExist:
             raise exceptions.AuthenticationFailed(_("Inactive company."))
 
         user, created = User.objects.get_or_create(
-            identifier=uuid.UUID(user['identifier']).hex,
-            company=company)
+            identifier=uuid.UUID(user['id']),
+            company=company
+        )
 
         return user, token

@@ -11,36 +11,10 @@ from rest_framework.decorators import api_view, permission_classes
 from {{cookiecutter.module_name}}.pagination import ResultsSetPagination
 from {{cookiecutter.module_name}}.authentication import AdminAuthentication
 from {{cookiecutter.module_name}}.serializers import (
-    ActivateSerializer, DeactivateSerializer, AdminCompanySerializer,
-    CurrencySerializer
+    ActivateSerializer, DeactivateSerializer, AdminCompanySerializer
 )
-from {{cookiecutter.module_name}}.models import Currency
 
 logger = getLogger('django')
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny, ])
-def root(request, format=None):
-    return Response(
-        [
-            {'Public': OrderedDict([
-                ('Activate', reverse('{{cookiecutter.module_name}}:activate',
-                    request=request,
-                    format=format)),
-                ('Deactivate', reverse('{{cookiecutter.module_name}}:deactivate',
-                    request=request,
-                    format=format))
-            ])},
-            {'Admins': OrderedDict([
-                ('Company', reverse('{{cookiecutter.module_name}}:admin-company',
-                    request=request,
-                    format=format)),
-                ('Currencies', reverse('{{cookiecutter.module_name}}:admin-currencies',
-                    request=request,
-                    format=format))
-            ])},
-        ])
 
 
 class ListModelMixin(object):
@@ -71,6 +45,11 @@ class ListAPIView(ListModelMixin,
 
 
 class ActivateView(GenericAPIView):
+    """
+    Activate a company in the {{cookiecutter.project_name}}.
+    A secret key is created on activation.
+    """
+
     allowed_methods = ('POST',)
     permission_classes = (AllowAny, )
     serializer_class = ActivateSerializer
@@ -78,14 +57,14 @@ class ActivateView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {'status': 'success', 'data': serializer.data},
-            status=status.HTTP_201_CREATED
-        )
+        instance = serializer.save()
+        return Response({'status': 'success', 'data': serializer.data})
 
 
 class DeactivateView(GenericAPIView):
+    """
+    Dectivate a company in the {{cookiecutter.project_name}}.
+    """
     allowed_methods = ('POST',)
     permission_classes = (AllowAny, )
     serializer_class = DeactivateSerializer
@@ -98,6 +77,11 @@ class DeactivateView(GenericAPIView):
 
 
 class AdminCompanyView(GenericAPIView):
+    """
+    View and update company. Authenticates requests using a token in the
+    Authorization header.
+    """
+
     allowed_methods = ('GET', 'PATCH',)
     serializer_class = AdminCompanySerializer
     authentication_classes = (AdminAuthentication,)
@@ -107,33 +91,9 @@ class AdminCompanyView(GenericAPIView):
         serializer = self.get_serializer(company)
         return Response({'status': 'success', 'data': serializer.data})
 
-
-class AdminCurrencyListView(ListAPIView):
-    allowed_methods = ('GET',)
-    pagination_class = ResultsSetPagination
-    serializer_class = CurrencySerializer
-    authentication_classes = (AdminAuthentication,)
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('code',)
-
-    def get_queryset(self):
-        company = self.request.user.company
-        return Currency.objects.filter(company=company)
-
-
-class AdminCurrencyView(GenericAPIView):
-    allowed_methods = ('GET',)
-    serializer_class = CurrencySerializer
-    authentication_classes = (AdminAuthentication,)
-
-    def get(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         company = request.user.company
-        code = kwargs['code']
-
-        try:
-            currency = Currency.objects.get(company=company, code__iexact=code)
-        except Currency.DoesNotExist:
-            raise exceptions.NotFound()
-
-        serializer = self.get_serializer(currency)
+        serializer = self.get_serializer(company, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
         return Response({'status': 'success', 'data': serializer.data})
