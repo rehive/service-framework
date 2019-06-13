@@ -1,20 +1,20 @@
 version: '1'
 configs:
-    staging:
-      project_name: {{cookiecutter.app_name}}
-      docker_image: gcr.io/rehive-services/{{cookiecutter.app_name}}
-      cloud_project: rehive-services
-      cluster: staging
-      namespace: {{cookiecutter.app_name}}-staging
-      helm_values_path: ./etc/helm/staging/values.yaml
-      helm_chart: rehive/rehive-service
-      helm_chart_version: 0.1.32
-    production:
-      project_name: {{cookiecutter.app_name}}
-      docker_image: gcr.io/rehive-services/{{cookiecutter.app_name}}
-      cloud_project: rehive-services
-      cluster: production
-      namespace: {{cookiecutter.app_name}}
-      helm_values_path: ./etc/helm/production/values.yaml
-      helm_chart: rehive/rehive-service
-      helm_chart_version: 0.1.32
+  staging:
+    project_name: {{cookiecutter.app_name}}
+    docker_image: gcr.io/rehive-services/{{cookiecutter.app_name}}
+    cloud_project: rehive-services
+    cluster: staging
+    namespace: {{cookiecutter.app_name}}-staging
+    helm_values_path: ./etc/helm/staging/values.yaml
+    helm_chart: rehive/rehive-service
+    helm_chart_version: 0.1.36
+  production:
+    project_name: {{cookiecutter.app_name}}
+    docker_image: gcr.io/rehive-services/{{cookiecutter.app_name}}
+    cloud_project: rehive-services
+    cluster: production
+    namespace: {{cookiecutter.app_name}}
+    helm_values_path: ./etc/helm/production/values.yaml
+    helm_chart: rehive/rehive-service
+    helm_chart_version: 0.1.36
