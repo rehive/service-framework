@@ -5,6 +5,9 @@ deployment:
     limits:
       cpu: 500m
       memory: 512Mi
+envFromSecret:
+  enabled: true
+  secretName: {{ cookiecutter.app_name }}
 image:
   pullPolicy: IfNotPresent
   repository: gcr.io/rehive-services/{{cookiecutter.app_name}}
