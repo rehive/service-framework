@@ -24,7 +24,7 @@ def make_django_secret():
         file_data = _file.read()
 
     secret_key = ''.join(random.SystemRandom().choice(
-        string.ascii_letters + string.digits + string.punctuation
+        string.ascii_letters + string.digits
     ) for i in range(50))
 
     file_data = file_data.replace('replace_django_secret', secret_key, 1)

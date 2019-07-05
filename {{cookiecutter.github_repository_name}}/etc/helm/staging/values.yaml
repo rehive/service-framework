@@ -1,10 +1,6 @@
 deployment:
   command: '[''gunicorn'', ''config.wsgi:application'', ''--config'', ''file:config/gunicorn.py'']'
   replicaCount: 1
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
 envFromSecret:
   enabled: true
   secretName: {{ cookiecutter.app_name }}
@@ -18,10 +14,10 @@ ingress:
     kubernetes.io/tls-acme: "true"
   enabled: true
   hosts:
-  - {{cookiecutter.app_name}}.s.extensions.rehive.io
+  - {{cookiecutter.app_name}}.s.services.rehive.io
   tls:
   - hosts:
-    - {{cookiecutter.app_name}}.s.extensions.rehive.io
+    - {{cookiecutter.app_name}}.s.services.rehive.io
     secretName: {{cookiecutter.app_name}}-staging-tls
 postgres:
   enabled: true
