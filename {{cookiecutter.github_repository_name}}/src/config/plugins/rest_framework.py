@@ -7,6 +7,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 # REST FRAMEWORK ~ http://www.django-rest-framework.org/
 # ---------------------------------------------------------------------------------------------------------------------
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
     'DEFAULT_PERMISSION_CLASSES': (
         '{{cookiecutter.module_name}}.permissions.IsAuthenticated',
     ),

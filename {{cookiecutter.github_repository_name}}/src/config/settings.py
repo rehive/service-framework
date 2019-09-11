@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
 
+from .plugins.sentry import *
 from .plugins.secrets import *
 from .plugins.rest_framework import *
 from .plugins.yasg import *
@@ -46,16 +47,14 @@ INSTALLED_APPS = [
 # ---------------------------------------------------------------------------------------------------------------------
 
 MIDDLEWARE_CLASSES = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'healthz.middleware.HealthCheckMiddleware',
     'config.middleware.HealthCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'config.middleware.DisableCSRF',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -100,16 +99,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
 if os.environ.get('GCLOUD_USE_STATIC', '') == 'True':
     STATIC_URL = 'https://storage.googleapis.com/' + os.environ.get('GCLOUD_STATIC_BUCKET') + '/'
 
+# STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'var/www/static')
 
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_DIR, "config/static"),
+    # os.path.join(PROJECT_DIR, "var/www/static"),
+    # '/var/www/static/',
 ]
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'var/www/media')

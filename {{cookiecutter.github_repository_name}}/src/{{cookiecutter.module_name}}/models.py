@@ -25,7 +25,7 @@ class DateModel(models.Model):
 class Company(DateModel):
     identifier = models.CharField(max_length=100, unique=True, db_index=True)
     admin = models.OneToOneField('{{cookiecutter.module_name}}.User',
-        related_name='admin_company')
+        related_name='admin_company', on_delete=models.CASCADE)
     secret = models.UUIDField()
     name = models.CharField(max_length=100, null=True, blank=True)
     active = models.BooleanField(default=True, blank=False, null=False)
@@ -46,7 +46,7 @@ class Company(DateModel):
 class User(DateModel):
     identifier = models.UUIDField(unique=True, db_index=True)
     token = models.CharField(max_length=200, null=True)
-    company = models.ForeignKey('{{cookiecutter.module_name}}.Company', null=True)
+    company = models.ForeignKey('{{cookiecutter.module_name}}.Company', null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.identifier)

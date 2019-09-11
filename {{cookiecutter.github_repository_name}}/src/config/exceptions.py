@@ -5,7 +5,7 @@ from django.http import Http404
 from django.utils.encoding import force_text
 from rest_framework import status
 from rest_framework import exceptions, status
-from rest_framework.compat import set_rollback
+from rest_framework.views import set_rollback
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
@@ -31,10 +31,8 @@ class APIError(Exception):
 def custom_exception_handler(exc, context):
     """
         Returns the response that should be used for any given exception.
-
         By default we handle the REST framework `APIException`, and also
         Django's built-in `Http404` and `PermissionDenied` exceptions.
-
         Any unhandled exceptions may return `None`, which will cause a 500 error
         to be raised.
     """

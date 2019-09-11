@@ -1,4 +1,4 @@
-from django.conf.urls import include, url
+from django.urls import include, path, re_path
 from django.contrib import admin
 from django.conf import settings
 
@@ -28,24 +28,24 @@ schema_view = get_schema_view(
 )
 
 
-urlpatterns = (
-    url(r'^swagger(?P<format>\.json|\.yaml)$',
+urlpatterns = [
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$',
         schema_view.without_ui(cache_timeout=None),
         name='schema-json'),
-    url(r'^swagger/$',
+    re_path(r'^swagger/$',
         schema_view.with_ui('swagger', cache_timeout=None),
         name='schema-swagger-ui'),
-    url(r'^$',
+    re_path(r'^$',
         schema_view.with_ui('redoc', cache_timeout=None),
         name='schema-redoc'),
-    # Dashboard
-    url(r'^dashboard/', include(admin.site.urls)),
+
     # Views
-    url(r'^api/', include('{{cookiecutter.module_name}}.urls', namespace='{{cookiecutter.module_name}}')),
-)
+    re_path(r'^api/', include(('{{cookiecutter.module_name}}.urls','{{cookiecutter.module_name}'), namespace='{{cookiecutter.module_name}}')),
+    re_path(r'^admin/', admin.site.urls),
+]
 
 # Add debug URL routes
 if settings.DEBUG:
-    urlpatterns = (
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ) + urlpatterns
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
