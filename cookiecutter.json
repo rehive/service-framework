@@ -5,7 +5,7 @@
     "description": "A framework that can be used as a base to build service on Rehive",
     "module_name": "service_{{ cookiecutter.base_name}}",
     "github_repository_name": "service-{{ cookiecutter.base_name |replace('_', '-')}}",
-    "project_name": "rehive-services",
+    "cloud_project_name": "rehive-services",
     "server_infrastructure": [
         "Heroku + TravisCI",
         "GCloud + Kubernetes"
