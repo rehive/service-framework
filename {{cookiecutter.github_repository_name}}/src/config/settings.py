@@ -41,14 +41,14 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
     'drf_yasg',
+    'healthz',
 ]
 
 # Middleware
 # ---------------------------------------------------------------------------------------------------------------------
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'healthz.middleware.HealthCheckMiddleware',
-    'config.middleware.HealthCheckMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
