@@ -6,7 +6,7 @@ envFromSecret:
   secretName: {{ cookiecutter.app_name }}
 image:
   pullPolicy: IfNotPresent
-  repository: gcr.io/rehive-services/{{cookiecutter.app_name}}
+  repository: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
   tag: latest
 ingress:
   annotations:

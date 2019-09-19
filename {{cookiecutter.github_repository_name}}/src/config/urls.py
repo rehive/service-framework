@@ -40,7 +40,9 @@ urlpatterns = [
         name='schema-redoc'),
 
     # Views
-    re_path(r'^api/', include(('{{cookiecutter.module_name}}.urls','{{cookiecutter.module_name}}'), namespace='{{cookiecutter.module_name}}')),
+    re_path(r'^api/', include(('{{cookiecutter.module_name}}.urls',
+                               '{{cookiecutter.module_name}}'),
+                              namespace='{{cookiecutter.module_name}}')),
     re_path(r'^admin/', admin.site.urls),
 ]
 

@@ -5,7 +5,7 @@ cleanup:
     tag: v1.13.7
 cloneWithWale:
   cloneScope: dummy
-  cloneWalGcsBucket: {{cookiecutter.app_name}}-staging-wale
+  cloneWalGcsBucket: {{ cookiecutter.app_name }}-staging-wale
   cloneWaleEnvDir: /home/postgres/wal.e/env
   enable: false
 debug: false
@@ -41,7 +41,7 @@ walE:
   backupThresholdMegabytes: 1024
   backupThresholdPercentage: 30
   enable: true
-  gcsBucket: {{cookiecutter.app_name}}-staging-wale
+  gcsBucket: {{ cookiecutter.app_name }}-staging-wale
   kubernetesSecret: gcloud-wale
   retainBackups: 2
   s3Bucket: null

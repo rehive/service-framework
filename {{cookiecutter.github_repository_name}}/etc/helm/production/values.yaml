@@ -13,8 +13,8 @@ envFromSecret:
   secretName: {{ cookiecutter.app_name }}
 image:
   pullPolicy: IfNotPresent
-  repository: gcr.io/rehive-services/{{cookiecutter.app_name}}
-  tag: 0.1.2
+  repository: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
+  tag: latest
 ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -83,4 +83,4 @@ workers:
       limits:
         memory: 256M
         cpu: 66m
-workersEnabled: true
+workersEnabled: false
