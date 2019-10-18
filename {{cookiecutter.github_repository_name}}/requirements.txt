@@ -17,3 +17,6 @@ rehive==1.1.7
 requests==2.20.0
 sentry-sdk==0.6.9
 django-healthz==0.0.3
+django-rehive-extras==0.0.1
+drf-rehive-extras==0.0.3
+django-storages[google]==1.7.1

@@ -1,5 +1,12 @@
 import os
 
+options = {
+        'connect_timeout': 25,
+    }
+
+if not os.environ.get('DEBUG'):
+    options['sslmode'] = 'require'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -8,8 +15,6 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-        'OPTIONS': {
-            'connect_timeout': 25,
-        }
+        'OPTIONS': options
     }
 }

@@ -1,14 +1,19 @@
+bootstrapParameters:
+  dcs:
+    loop_wait: 30
+    retry_timeout: 10
+    ttl: 70
 cleanup:
   image:
     pullPolicy: IfNotPresent
     repository: gcr.io/google-containers/hyperkube
-    tag: v1.13.7
+    tag: v1.8.4_coreos.0
 cloneWithWale:
   cloneScope: dummy
-  cloneWalGcsBucket: {{ cookiecutter.app_name }}-staging-wale
+  cloneWalGcsBucket: {{ cookiecutter.app_name }}-staging-pgbackup
   cloneWaleEnvDir: /home/postgres/wal.e/env
   enable: false
-debug: false
+debug: true
 image:
   pullPolicy: Always
   repository: registry.opensource.zalan.do/acid/spilo-11
@@ -18,19 +23,25 @@ nodeSelector:
 persistentVolume:
   accessModes:
   - ReadWriteOnce
-  annotations: {}
+  annotations:
+    app: spilo
+    release: patroni-{{ cookiecutter.app_name }}
   enabled: true
-  size: 80Gi
+  size: 50Gi
   storageClass: patroni-standard
+podAntiAffinity: soft
 podAntiAffinity: soft
 postgresParameters:
   bin_dir: /usr/lib/postgresql/9.6/bin
+  parameters:
+    log_destination: stderr,csvlog
   pg_hba:
   - host    all             all                127.0.0.1/32       md5
-  - hostssl replication     standby            all                md5
-  - hostnossl all           all                all                trust
+  - hostssl replication     standby all                md5
+rbac:
+  create: true
 replicas: 1
-resources: {}
+resources: null
 tolerations:
 - effect: NoSchedule
   key: dedicated
@@ -41,8 +52,9 @@ walE:
   backupThresholdMegabytes: 1024
   backupThresholdPercentage: 30
   enable: true
-  gcsBucket: {{ cookiecutter.app_name }}-staging-wale
-  kubernetesSecret: gcloud-wale
+  envDir: /home/postgres/etc/wal-e.d/env
+  gcsBucket: {{ cookiecutter.app_name }}-staging-pgbackup
+  kubernetesSecret: google-credentials-{{ cookiecutter.app_name }}-staging-postgres
   retainBackups: 2
   s3Bucket: null
   scheduleCronJob: 00 01 * * *

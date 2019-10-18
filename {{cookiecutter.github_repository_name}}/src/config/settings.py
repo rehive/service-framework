@@ -12,7 +12,8 @@ from .plugins.secrets import *
 from .plugins.rest_framework import *
 from .plugins.yasg import *
 from .plugins.database import *
-
+from .plugins.gcloud_bucket import *
+from .plugins.healthz import *
 
 # Project paths
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -42,6 +43,9 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'drf_yasg',
     'healthz',
+    'drf_rehive_extras',
+    'django_rehive_extras',
+    'storages',
 ]
 
 # Middleware
@@ -150,3 +154,35 @@ SITE_ID = 1
 FIXTURE_DIRS = ['config/fixtures']
 
 CACHE_DIR = os.path.join(PROJECT_DIR, 'var/cache')
+
+# Logging
+# ----------------------------------------------------------------------------------------------------------------------
+
+from django.utils.log import DEFAULT_LOGGING
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s "
+                      "%(process)d %(thread)d %(message)s"
+        },
+        'django.server': DEFAULT_LOGGING['formatters']['django.server'],
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        'django.server': DEFAULT_LOGGING['handlers']['django.server'],
+    },
+    "loggers": {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'django.server': DEFAULT_LOGGING['loggers']['django.server'],
+    },
+}
