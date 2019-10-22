@@ -2,24 +2,7 @@ import datetime
 import uuid
 
 from django.db import models
-
-
-class DateModel(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return str(self.created)
-
-    def save(self, *args, **kwargs):
-        if not self.id:  # On create
-            self.created = datetime.datetime.now(tz=utc)
-
-        self.updated = datetime.datetime.now(tz=utc)
-        return super(DateModel, self).save(*args, **kwargs)
+from django_rehive_extras.models import DateModel
 
 
 class Company(DateModel):
