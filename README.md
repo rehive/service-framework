@@ -42,5 +42,5 @@ cookiecutter git@github.com:rehive/service-framework.git
 cookiecutter https://github.com/rehive/service-framework.git
 ```
 
-Run through the command promts and fill in your prejct details.
+Run through the command promts and fill in your project details.
 Follow the instructions in your newly cloned project for how to setup local development.
