@@ -4,7 +4,7 @@ options = {
         'connect_timeout': 25,
     }
 
-if not os.environ.get('DEBUG'):
+if not os.environ.get('POSTGRES_SSL_DISABLE') in [True, "True", 'true']:
     options['sslmode'] = 'require'
 
 DATABASES = {

@@ -1,19 +1,23 @@
 deployment:
-  command: '[''gunicorn'', ''config.wsgi:application'', ''--config'', ''file:config/gunicorn.py'']'
-  replicaCount: 3
+  command:
+    - gunicorn
+    - "config.wsgi:application"
+  args:
+    config: "file:config/gunicorn.py"
+  replicaCount: 1
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 100m
+      memory: 400Mi
     requests:
       cpu: 500m
-      memory: 450M
+      memory: 512Mi
 envFromSecret:
   enabled: true
   secretName: {{ cookiecutter.app_name }}
 image:
   pullPolicy: IfNotPresent
-  repository: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
+  repository: {{ cookiecutter.docker_image_production }}
   tag: latest
 ingress:
   annotations:
@@ -21,10 +25,10 @@ ingress:
     kubernetes.io/tls-acme: "true"
   enabled: true
   hosts:
-  - {{cookiecutter.app_name}}.services.rehive.io
+  - {{ cookiecutter.app_url_production }}
   tls:
   - hosts:
-    - {{cookiecutter.app_name}}.services.rehive.io
+    - {{ cookiecutter.app_url_production }}
     secretName: {{cookiecutter.app_name}}-tls
 postgres:
   enabled: true
@@ -61,21 +65,44 @@ service:
     timeoutSeconds: 2
   type: NodePort
 workers:
+  enabled: false
+  deployments:
   - name: worker-general
     internalPort: 8000
     replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--loglevel=INFO', '--concurrency=1', '--without-gossip', '--without-mingle', '--without-heartbeat', '-Q', 'general-{{cookiecutter.app_name}}']"
+    command:
+      - celery
+      - worker
+    args:
+      app: config.celery
+      loglevel: INFO
+      concurrency: 1
+      without-gossip: null
+      without-mingle: null
+      without-heartbeat: null
+      queue: general-{{cookiecutter.app_name}}
     resources:
       requests:
-        memory: 1024M
-        cpu: 266m
+        memory: 128M
+        cpu: 33m
       limits:
-        memory: 1024M
-        cpu: 266m
+        memory: 256M
+        cpu: m
   - name: scheduler
     internalPort: 8000
     replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--beat', '--loglevel=INFO', '--pidfile=', '--concurrency=1','--without-gossip', '--without-mingle', '--without-heartbeat',  '-Q', 'scheduler-{{cookiecutter.app_name}}']"
+    command:
+      - celery
+      - worker
+    args:
+      app: config.celery
+      beat: null
+      loglevel: INFO
+      concurrency: 1
+      without-gossip: null
+      without-mingle: null
+      without-heartbeat: null
+      queue: general-{{cookiecutter.app_name}}
     resources:
       requests:
         memory: 256M
@@ -83,4 +110,3 @@ workers:
       limits:
         memory: 256M
         cpu: 66m
-workersEnabled: false

@@ -1,20 +1,32 @@
-version: '1'
+version: '2'
 configs:
   staging:
     project_name: {{cookiecutter.app_name}}
-    docker_image: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
-    cloud_project: {{ cookiecutter.cloud_project_name }}
-    cluster: staging
+    docker_image: {{ cookiecutter.docker_image_production }}
+    cloud_provider:
+      name: azure
+      subscription_id: 57800aa9-e115-4ede-9b70-0e1ce97294f6
+      resource_group: rehive-services-staging
+      region: westeurope
+      kube_cluster: rehive-services-staging
+      container_registry: rehiveservices
     namespace: {{cookiecutter.app_name}}-staging
     helm_values_path: ./etc/helm/staging/values.yaml
     helm_chart: rehive/rehive-service
-    helm_chart_version: 0.1.36
+    helm_chart_version: 0.2.2
+    helm_version: 3.1.1
+    use_system_helm: false
   production:
     project_name: {{cookiecutter.app_name}}
-    docker_image: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
-    cloud_project: {{ cookiecutter.cloud_project_name }}
-    cluster: production
+    docker_image: {{ cookiecutter.docker_image_staging }}
+    cloud_provider:
+        name: gcp
+        project: rehive-services
+        kube_cluster: production
+        zone: europe-west1-c
     namespace: {{cookiecutter.app_name}}
     helm_values_path: ./etc/helm/production/values.yaml
     helm_chart: rehive/rehive-service
-    helm_chart_version: 0.1.36
+    helm_chart_version: 0.2.2
+    helm_version: 2.14.3
+    use_system_helm: false

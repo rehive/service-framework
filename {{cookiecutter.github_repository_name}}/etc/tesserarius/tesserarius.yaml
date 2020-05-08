@@ -1,0 +1,37 @@
+version: 1
+environment:
+  extensions:
+    staging:
+      azure:
+        subscription_id: 57800aa9-e115-4ede-9b70-0e1ce97294f6
+        resource_group: rehive-services-staging
+        region: westeurope
+      gcloud:
+        project: rehive-services
+        zone: europe-west1-c
+      kubernetes:
+        cloud_provider: azure
+        cluster: rehive-services-staging
+        namespace: {{ cookiecutter.app_name }}-staging
+    production:
+      gcloud:
+        project: rehive-services
+        zone: europe-west1-c
+      kubernetes:
+        cluster: production
+        namespace: {{ cookiecutter.app_name }}
+  platform: {}
+extensions:
+  serviceAccount:
+  - name: {{ cookiecutter.app_short_name }}-postgres
+    displayName: "{{ cookiecutter.project_name }} Backup Writer"
+    description: "Service Account for the {{ cookiecutter.project_name }} on production to write to postgres backups to the bucket"
+    role: extensions.bucket.writer
+    environment: production
+  - name: {{ cookiecutter.app_short_name }}-staging-postgres
+    displayName: "{{ cookiecutter.project_name }} Backup Writer"
+    description: "Service Account for the {{ cookiecutter.project_name }} on staging to write to postgres backups the bucket"
+    role: extensions.bucket.writer
+    environment: staging
+  bindings: []
+platform: {}

@@ -1,12 +1,17 @@
 deployment:
-  command: '[''gunicorn'', ''config.wsgi:application'', ''--config'', ''file:config/gunicorn.py'']'
+  command:
+    - gunicorn
+    - "config.wsgi:application"
+  args:
+    config: "file:config/gunicorn.py"
   replicaCount: 1
+  resources: null
 envFromSecret:
   enabled: true
   secretName: {{ cookiecutter.app_name }}
 image:
   pullPolicy: IfNotPresent
-  repository: gcr.io/{{ cookiecutter.cloud_project_name }}/{{cookiecutter.app_name}}
+  repository: {{ cookiecutter.docker_image_staging }}
   tag: latest
 ingress:
   annotations:
@@ -14,15 +19,15 @@ ingress:
     kubernetes.io/tls-acme: "true"
   enabled: true
   hosts:
-  - {{cookiecutter.app_name}}.s.services.rehive.io
+  - {{ cookiecutter.app_url_staging }}
   tls:
   - hosts:
-    - {{cookiecutter.app_name}}.s.services.rehive.io
-    secretName: {{cookiecutter.app_name}}-staging-tls
+    - {{ cookiecutter.app_url_staging }}
+    secretName: {{cookiecutter.app_name}}-tls
 postgres:
   enabled: true
   host: patroni-{{cookiecutter.app_name}}-patroni.{{cookiecutter.app_name}}-staging.svc.cluster.local
-  port: "5432"
+  port: 5432
   secret:
     key: password-admin
     name: patroni-{{cookiecutter.app_name}}-patroni
@@ -34,13 +39,6 @@ rabbitmq:
   secret:
     name: rabbitmq-ha-{{cookiecutter.app_name}}
     key: rabbitmq-password
-redis:
-  enabled: true
-  host: redis-{{cookiecutter.app_name}}-master.{{cookiecutter.app_name}}-staging.svc.cluster.local
-  port: 6379
-  secret:
-    key: redis-password
-    name: redis-{{cookiecutter.app_name}}
 service:
   externalPort: 80
   internalPort: 8000
@@ -61,27 +59,14 @@ service:
     timeoutSeconds: 2
   type: NodePort
 workers:
+  enabled: false
   - name: worker-general
     internalPort: 8000
     replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--loglevel=INFO', '--concurrency=1', '--without-gossip', '--without-mingle', '--without-heartbeat', '-Q', 'general-{{cookiecutter.app_name}}-staging']"
-    resources:
-      requests:
-        memory: 1024M
-        cpu: 266m
-      limits:
-        memory: 1024M
-        cpu: 266m
+    command: "['celery', '-A', 'config.celery', 'worker', '--loglevel=INFO', '--concurrency=1', '--without-gossip', '--without-mingle', '--without-heartbeat', '-Q', 'general-{{cookiecutter.app_name}}']"
+    resources: null
   - name: scheduler
     internalPort: 8000
     replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--beat', '--loglevel=INFO', '--pidfile=', '--concurrency=1','--without-gossip', '--without-mingle', '--without-heartbeat',  '-Q', 'scheduler-{{cookiecutter.app_name}}-staging']"
-    resources:
-      requests:
-        memory: 256M
-        cpu: 66m
-      limits:
-        memory: 256M
-        cpu: 66m
-workersEnabled: true
-
+    command: "['celery', '-A', 'config.celery', 'worker', '--beat', '--loglevel=INFO', '--pidfile=', '--concurrency=1','--without-gossip', '--without-mingle', '--without-heartbeat',  '-Q', 'scheduler-{{cookiecutter.app_name}}']"
+    resources: null

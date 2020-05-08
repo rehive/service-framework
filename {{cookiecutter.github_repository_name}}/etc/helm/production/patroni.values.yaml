@@ -1,63 +1,66 @@
-  
-bootstrapParameters:
-  dcs:
-    loop_wait: 30
-    retry_timeout: 10
-    ttl: 70
-cleanup:
-  image:
-    pullPolicy: IfNotPresent
-    repository: quay.io/coreos/hyperkube
-    tag: v1.8.4_coreos.0
-cloneWithWale:
-  cloneScope: dummy
-  cloneWalGcsBucket: {{ cookiecutter.app_name }}-pgbackup
-  cloneWaleEnvDir: /home/postgres/wal.e/env
-  enable: false
-debug: false
 image:
-  pullPolicy: Always
-  repository: registry.opensource.zalan.do/acid/spilo-11
-  tag: 1.5-p6
+  repository: rehive/spilo-11
+  tag: 1.6.1
+  pullPolicy: IfNotPresent
+  init:
+    command:
+      - '/bin/sh'
+    args:
+      - '/launch.sh'
+      - init
+replicas: 1
+debug: true
+podAntiAffinity: soft
 nodeSelector:
   cloud.google.com/gke-nodepool: postgres-pool
-persistentVolume:
-  accessModes:
-  - ReadWriteOnce
-  annotations:
-    app: spilo
-    release: patroni-{{ cookiecutter.app_name }}
-  enabled: true
-  size: 50Gi
-  storageClass: patroni-standard
-podAntiAffinity: soft
-postgresParameters:
-  bin_dir: /usr/lib/postgresql/9.6/bin
-  parameters:
-    log_destination: stderr,csvlog
-  pg_hba:
-  - host    all             all                127.0.0.1/32       md5
-  - hostssl replication     standby all                md5
-rbac:
-  create: true
-replicas: 1
-resources: null
-serviceAccount:
-  create: true
 tolerations:
 - effect: NoSchedule
   key: dedicated
   operator: Equal
   value: postgres
-useConfigMaps: false
+resources: {}
+bootstrapParameters:
+  dcs:
+    loop_wait: 70
+    retry_timeout: 35
+    ttl: 140
 walE:
+  enabled: true
+  envDir: /home/postgres/etc/wal-e.d/env
+  gcloudCredentials: google-credentials-postgres.json
+  scheduleCronJob: 00 01 * * *
+  retainBackups: 2
+  s3Bucket:
+  gcsBucket: {{cookiecutter.app_name}}-pgbackup
   backupThresholdMegabytes: 1024
   backupThresholdPercentage: 30
-  enable: true
-  envDir: /home/postgres/etc/wal-e.d/env
-  gcsBucket: {{ cookiecutter.app_name }}-pgbackup
-  kubernetesSecret: google-credentials-{{ cookiecutter.app_name }}-postgres
-  retainBackups: 2
-  s3Bucket: null
-  scheduleCronJob: 00 01 * * *
-
+gcloudCredentials:
+  enabled: true
+  secretName: google-credentials-postgres
+cloneWithWale:
+  enabled: false
+  cloneScope: patroni-{{cookiecutter.app_name}}-patroni
+  cloneWalGcsBucket: {{cookiecutter.app_name}}-pgbackup
+  gcloudCredentials: google-credentials-postgres.json
+  cloneWaleEnvDir: /home/postgres/etc/clone-wal-e.d/env
+persistentVolume:
+  accessModes:
+  - ReadWriteOnce
+  annotations:
+    app: spilo
+    release: patroni-{{cookiecutter.app_name}}
+  enabled: true
+  size: 50Gi
+  storageClass: patroni-standard
+cleanup:
+  image:
+    pullPolicy: IfNotPresent
+    repository: quay.io/coreos/hyperkube
+    tag: v1.8.4_coreos.0
+rbac:
+  create: true
+serviceAccount:
+  create: true
+postgresParameters:
+  bin_dir: /usr/lib/postgresql/9.6/bin
+useConfigMaps: false
