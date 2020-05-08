@@ -105,8 +105,8 @@ workers:
       queue: general-{{cookiecutter.app_name}}
     resources:
       requests:
-        memory: 256M
-        cpu: 66m
+        memory: 128M
+        cpu: 33m
       limits:
         memory: 256M
         cpu: 66m
