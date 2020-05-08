@@ -11,8 +11,13 @@ Make sure you have the following installed
 **Create a vitual environment and activate it**
 
 If you are new to this, virtualenv with virtualenvwrapper is a straight forward
-and relatelive simple was to use virtual environments. 
+and relatively simple was to use virtual environments.
 The [The Hitchhiker’s Guide to Python!](http://docs.python-guide.org/en/latest/) has a nice tutorial for setting up [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv) and [virtualenvwrapper](http://docs.python-guide.org/en/latest/dev/virtualenvs/#virtualenvwrapper)
+
+Else, with conda:
+```
+conda create -n service-test python=3.6
+```
 
 **Install requirements**
 ```
@@ -28,17 +33,17 @@ Run `docker ps` to make sure your container is running.
 
 **Migrate all the data to the database**
 ```
-./manage.py migrate
+python src/manage.py migrate
 ```
 
 **Setup all the static files**
 ```
-./manage.py collectstatic
+python src/manage.py collectstatic
 ```
 
 **Run the webserver to see if all is working**
 ```
-./manage.py runserver
+python src/manage.py runserver
 ```
 
 ## Local development
@@ -49,7 +54,7 @@ docker-compose up -d postgres
 
 **Run the webserver**
 ```
-./manage.py runserver
+python src/manage.py manage.py runserver
 ```
 
 ## Deployments
@@ -83,27 +88,35 @@ heroku config:set \
 - Encrypt your Heroky credentials and allow Travis to view them for deployments
 ```
 travis encrypt HEROKU_AUTH_TOKEN="$(heroku auth:token)" --add
-``` 
+```
 - Commit and push the changes to master to trigger the first build
 
 Google cloud:
+Install rdeploy
+```
+pip install rdeploy
+```
 Gcloud login
 ```
-glcoud auth loging
+glcoud auth login
 ```
 Create namespace
 ```
-inv create_namespace staging
+rdeploy create-namespace staging
 ```
-Build cloud image
+Tag the release
 ```
-inv cloudbuild_initial staging
+rdeploy git-release patch staging
+```
+Build the docker image
+```
+rdeploy cloudbuild staging 0.0.1
 ```
 Upload secrets
 ```
-inv upload_secrets staging
+rdeploy upload-secrets staging local/path/to/staging.env
 ```
 Install
 ```
-inv install staging
+rdeploy install staging
 ```

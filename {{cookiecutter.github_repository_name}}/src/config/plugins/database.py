@@ -18,3 +18,6 @@ DATABASES = {
         'OPTIONS': options
     }
 }
+
+if os.environ.get('DOCKER_NETWORK', False) in [True, 'True', 'true']:
+    DATABASES['default']['PORT'] = '5432'
