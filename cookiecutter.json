@@ -3,7 +3,7 @@
     "app_name": "service-test",
     "app_short_name": "test",
     "description": "A test project created using the Service Framework",
-    "module_name": "{{ cookiecutter.app_name|replace('_', '-') }}",
+    "module_name": "{{ cookiecutter.app_name|replace('-', '_') }}",
     "github_repository_name": "{{ cookiecutter.app_name }}",
     "docker_image_staging": "rehiveservices.azurecr.io/{{ cookiecutter.app_name }}",
     "docker_image_production": "gcr.io/rehive-services/{{cookiecutter.app_name}}",
