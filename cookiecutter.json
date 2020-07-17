@@ -1,11 +1,14 @@
 {
-    "project_name": "Service Framework",
-    "base_name": "{{ cookiecutter.project_name.split()|join(' ')|lower|replace(' ', '_')|replace('-', '_') }}",
-    "app_name": "{{ cookiecutter.base_name|replace('_', '-') }}",
-    "description": "A framework that can be used as a base to build service on Rehive",
-    "module_name": "{{ cookiecutter.base_name}}",
-    "github_repository_name": "service-{{ cookiecutter.base_name |replace('_', '-')}}",
-    "cloud_project_name": "rehive-services",
+    "project_name": "Test Service",
+    "app_name": "service-test",
+    "app_short_name": "test",
+    "description": "A test project created using the Service Framework",
+    "module_name": "{{ cookiecutter.app_name|replace('-', '_') }}",
+    "github_repository_name": "{{ cookiecutter.app_name }}",
+    "docker_image_staging": "rehiveservices.azurecr.io/{{ cookiecutter.app_name }}",
+    "docker_image_production": "gcr.io/rehive-services/{{cookiecutter.app_name}}",
+    "app_url_staging": "{{ cookiecutter.app_short_name }}.s.services.rehive.io",
+    "app_url_production": "{{ cookiecutter.app_short_name }}.services.rehive.io",
     "server_infrastructure": [
         "Heroku + TravisCI",
         "GCloud + Kubernetes"

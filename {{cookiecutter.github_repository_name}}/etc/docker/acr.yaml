@@ -1,0 +1,12 @@
+version: v1.1.0
+steps:
+  - id: build-image
+    build: '-t {{ .Values.IMAGE }}:{{ .Values.TAG_NAME }} -t {{ .Values.IMAGE }}:latest -f etc/docker/Dockerfile .'
+    cache: enabled
+    when: ["-"]
+  - id: push-image
+    push: ["{{ .Values.IMAGE }}:{{ .Values.TAG_NAME }}"]
+    when: ["build-image"]
+  - id: push-latest
+    push: ["{{ .Values.IMAGE }}:latest"]
+    when: ["build-image"]
