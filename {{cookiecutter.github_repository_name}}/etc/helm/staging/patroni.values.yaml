@@ -11,8 +11,6 @@ image:
 replicas: 1
 debug: true
 podAntiAffinity: soft
-nodeSelector:
-  cloud.google.com/gke-nodepool: postgres-pool
 tolerations:
 - effect: NoSchedule
   key: dedicated

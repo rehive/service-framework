@@ -33,7 +33,7 @@ postgres:
     name: patroni-{{cookiecutter.app_name}}-patroni
   user: webapp
 rabbitmq:
-  enabled: true
+  enabled: false
   host: rabbitmq-ha-{{cookiecutter.app_name}}.{{cookiecutter.app_name}}-staging.svc.cluster.local
   port: 5672
   secret:
@@ -58,15 +58,7 @@ service:
     periodSeconds: 10
     timeoutSeconds: 2
   type: NodePort
+management:
+  enabled: false
 workers:
   enabled: false
-  - name: worker-general
-    internalPort: 8000
-    replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--loglevel=INFO', '--concurrency=1', '--without-gossip', '--without-mingle', '--without-heartbeat', '-Q', 'general-{{cookiecutter.app_name}}']"
-    resources: null
-  - name: scheduler
-    internalPort: 8000
-    replicaCount: 1
-    command: "['celery', '-A', 'config.celery', 'worker', '--beat', '--loglevel=INFO', '--pidfile=', '--concurrency=1','--without-gossip', '--without-mingle', '--without-heartbeat',  '-Q', 'scheduler-{{cookiecutter.app_name}}']"
-    resources: null

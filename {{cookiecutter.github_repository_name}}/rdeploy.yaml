@@ -2,7 +2,7 @@ version: '2'
 configs:
   staging:
     project_name: {{cookiecutter.app_name}}
-    docker_image: {{ cookiecutter.docker_image_production }}
+    docker_image: {{ cookiecutter.docker_image_staging }}
     cloud_provider:
       name: azure
       subscription_id: 57800aa9-e115-4ede-9b70-0e1ce97294f6
@@ -18,7 +18,7 @@ configs:
     use_system_helm: false
   production:
     project_name: {{cookiecutter.app_name}}
-    docker_image: {{ cookiecutter.docker_image_staging }}
+    docker_image: {{ cookiecutter.docker_image_production }}
     cloud_provider:
         name: gcp
         project: rehive-services
