@@ -20,10 +20,10 @@ configs:
     project_name: {{cookiecutter.app_name}}
     docker_image: {{ cookiecutter.docker_image_production }}
     cloud_provider:
-        name: gcp
-        project: rehive-services
-        kube_cluster: production
-        zone: europe-west1-c
+      name: gcp
+      project: rehive-services
+      kube_cluster: production
+      zone: europe-west1-c
     namespace: {{cookiecutter.app_name}}
     helm_values_path: ./etc/helm/production/values.yaml
     helm_chart: rehive/rehive-service
