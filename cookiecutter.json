@@ -14,6 +14,7 @@
         "GCloud + Kubernetes"
     ],
     "_copy_without_render": [
-        "*.html"
+        "*.html",
+        "/etc/docker/acr.yaml"
     ]
 }
