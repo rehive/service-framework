@@ -15,6 +15,6 @@
     ],
     "_copy_without_render": [
         "*.html",
-        "{{cookiecutter.github_repository_name}}/etc/docker/acr.yaml"
+        "*acr.yaml"
     ]
 }
