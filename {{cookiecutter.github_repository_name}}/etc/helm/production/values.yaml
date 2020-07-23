@@ -14,7 +14,7 @@ deployment:
       cpu: 500m
 image:
   pullPolicy: IfNotPresent
-  repository: {{ cookiecutter.docker_image }}
+  repository: {{ cookiecutter.docker_image_production }}
   tag: latest
 ingress:
   annotations:
