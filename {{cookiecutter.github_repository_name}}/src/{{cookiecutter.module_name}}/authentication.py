@@ -29,61 +29,44 @@ class HeaderAuthentication(authentication.BaseAuthentication):
         return auth[1]
 
 
-class AdminAuthentication(HeaderAuthentication):
-    """
-    Authentication for admin users.
-    """
+class RehiveAuthentication(authentication.BaseAuthentication):
+    # List of Rehive user groups that are allowed.
+    # An empty list means all user groups are allowed.
+    groups = []
+
+    @staticmethod
+    def get_auth_header(request, name="token"):
+        try:
+            auth = request.META['HTTP_AUTHORIZATION'].split()
+        except KeyError:
+            return None
+
+        if not auth or smart_text(auth[0].lower()) != name:
+            return None
+
+        if not auth[1]:
+            return None
+
+        return auth[1]
 
     def authenticate(self, request):
         token = self.get_auth_header(request)
-        # token = "" #Overide token for testing
-
         rehive = Rehive(token)
 
-        try:
-            user = rehive.auth.tokens.verify(token)
-            groups = [g['name'] for g in user['groups']]
-            if len(set(["admin", "service"]).intersection(groups)) <= 0:
-                raise exceptions.AuthenticationFailed(_('Invalid admin user'))
-        except APIException as exc:
-            if (hasattr(exc, 'data')):
-                message = exc.data['message']
-            else:
-                message = _('Invalid user')
-
-            raise exceptions.AuthenticationFailed(message)
-
-        try:
-            company = Company.objects.get(
-                identifier=user['company'],
-                active=True
-            )
-        except Company.DoesNotExist:
+        if not token:
             raise exceptions.AuthenticationFailed(
-                _("Inactive company. Please activate the company first."))
-
-        user, created = User.objects.get_or_create(
-            identifier=uuid.UUID(user['id']),
-            company=company
-        )
-
-        # Return the permanent token for (not the request token) the company.
-        return user, company.admin.token
-
-
-class UserAuthentication(HeaderAuthentication):
-    """
-    Authentication for users.
-    """
-
-    def authenticate(self, request):
-        token = self.get_auth_header(request)
-        # token = "" #Overide token for testing
-
-        rehive = Rehive(token)
+                _("Authentication credentials were not provided.")
+            )
 
         try:
-            user = rehive.auth.tokens.verify(token)
+            user = rehive.auth.get()
+            # Get a list of groups the user belongs to.
+            groups = [g['name'] for g in user['groups']]
+            # If a list of groups is defined make sure only those groups are
+            # allowed.
+            if (self.groups
+                    and len(set(self.groups).intersection(groups)) <= 0):
+                raise exceptions.AuthenticationFailed(_('Invalid user'))
         except APIException as exc:
             if (hasattr(exc, 'data')):
                 message = exc.data['message']
@@ -106,3 +89,19 @@ class UserAuthentication(HeaderAuthentication):
         )
 
         return user, token
+
+
+class AdminAuthentication(RehiveAuthentication):
+    """
+    Only admin level users can access endpoints under this level.
+    """
+
+    groups = ["admin", "service",]
+
+
+class UserAuthentication(RehiveAuthentication):
+    """
+    All rehive users can access endpoints under this level.
+    """
+
+    pass
