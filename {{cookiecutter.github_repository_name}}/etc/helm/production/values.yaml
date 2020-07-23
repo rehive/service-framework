@@ -22,10 +22,10 @@ ingress:
     kubernetes.io/tls-acme: "true"
   enabled: true
   hosts:
-  - {{ cookiecutter.app_url }}
+  - {{ cookiecutter.app_url_production }}
   tls:
   - hosts:
-    - {{ cookiecutter.app_url }}
+    - {{ cookiecutter.app_url_production }}
     secretName: {{cookiecutter.app_name}}-tls
 management:
   enabled: false
