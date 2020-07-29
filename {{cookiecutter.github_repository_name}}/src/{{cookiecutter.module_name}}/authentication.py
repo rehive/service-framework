@@ -59,9 +59,9 @@ class RehiveAuthentication(authentication.BaseAuthentication):
             )
 
         try:
-            user = rehive.auth.get()
+            platform_user = rehive.auth.get()
             # Get a list of groups the user belongs to.
-            groups = [g['name'] for g in user['groups']]
+            groups = [g['name'] for g in platform_user['groups']]
             # If a list of groups is defined make sure only those groups are
             # allowed.
             if (self.groups
@@ -77,16 +77,19 @@ class RehiveAuthentication(authentication.BaseAuthentication):
 
         try:
             company = Company.objects.get(
-                identifier=user['company'],
+                identifier=platform_user['company'],
                 active=True
             )
         except Company.DoesNotExist:
             raise exceptions.AuthenticationFailed(_("Inactive company."))
 
         user, created = User.objects.get_or_create(
-            identifier=uuid.UUID(user['id']),
+            identifier=uuid.UUID(platform_user['id']),
             company=company
         )
+
+        # Inject the platform user object into the auth user.
+        user._platform_user = platform_user
 
         return user, token
 
