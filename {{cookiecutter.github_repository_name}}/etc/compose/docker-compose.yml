@@ -40,6 +40,8 @@ services:
     ports:
       - '${POSTGRES_PORT}:5432'
     restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
