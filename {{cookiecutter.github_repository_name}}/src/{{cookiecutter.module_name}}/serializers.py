@@ -23,7 +23,7 @@ class ActivateSerializer(serializers.Serializer):
         rehive = Rehive(token)
 
         try:
-            user = rehive.auth.tokens.verify(token)
+            user = rehive.auth.get()
             groups = [g['name'] for g in user['groups']]
             if len(set(["admin", "service"]).intersection(groups)) <= 0:
                 raise serializers.ValidationError(
@@ -93,7 +93,7 @@ class DeactivateSerializer(serializers.Serializer):
         rehive = Rehive(token)
 
         try:
-            user = rehive.auth.tokens.verify(token)
+            user = rehive.auth.get()
             groups = [g['name'] for g in user['groups']]
             if len(set(["admin", "service"]).intersection(groups)) <= 0:
                 raise serializers.ValidationError(
