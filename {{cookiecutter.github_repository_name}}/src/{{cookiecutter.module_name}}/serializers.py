@@ -36,12 +36,6 @@ class ActivateSerializer(serializers.Serializer):
         except APIException:
             raise serializers.ValidationError({"token": ["Invalid company."]})
 
-        if Company.objects.filter(
-                identifier=company['id'],
-                active=True).exists():
-            raise serializers.ValidationError(
-                {"token": ["Company already activated."]})
-
         validated_data['user'] = user
         validated_data['company'] = company
 
@@ -58,25 +52,43 @@ class ActivateSerializer(serializers.Serializer):
             company = Company.objects.get(
                 identifier=rehive_company.get('id')
             )
-        # Ceate a new company and activate it.
+        # If no company exists create a new new admin user and company.
         except Company.DoesNotExist:
-            with transaction.atomic():
-                user = User.objects.create(
-                    token=token,
-                    identifier=uuid.UUID(rehive_user['id'])
-                )
-                company = Company.objects.create(
-                    admin=user,
-                    identifier=rehive_company.get('id'),
-                    name=rehive_company.get('name')
-                )
+            user = User.objects.create(
+                token=token,
+                identifier=uuid.UUID(rehive_user['id'])
+            )
+            company = Company.objects.create(
+                admin=user,
+                identifier=rehive_company.get('id'),
+                name=rehive_company.get('name')
+            )
             user.company = company
             user.save()
+        # If company existed then reactivate it.
         else:
-            company.admin.token = token
-            company.active = True
-            company.admin.save()
-            company.save()
+            # If reactivating a company using a different service admin then
+            # create a new user and set it as the admin.
+            if str(company.admin.identifier) != rehive_user["id"]:
+                user = User.objects.create(
+                    token=token,
+                    identifier=uuid.UUID(rehive_user['id']),
+                    company=company
+                )
+                # Remove the token from the old admin.
+                old_admin = company.admin
+                old_admin.token = None
+                old_admin.save()
+                # Set the new admin.
+                company.admin = user
+                company.active = True
+                company.save()
+            # Else just update the admin token with the new one.
+            else:
+                company.admin.token = token
+                company.admin.save()
+                company.active = True
+                company.save()
 
         return company
 
