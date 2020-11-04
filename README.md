@@ -7,7 +7,7 @@
 
 ## Features
 - Python 3.6
-- Django 2.2.4
+- Django 2.2.13
 - [Django Rest Framework](http://www.django-rest-framework.org/) integration
 - PostgreSQL 9.6
 - Running in a self-contained [Docker](https://www.docker.com/) containers
