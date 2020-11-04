@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
     '{{cookiecutter.module_name}}',
 
-    'debug_toolbar',
     'drf_yasg',
     'healthz',
     'drf_rehive_extras',

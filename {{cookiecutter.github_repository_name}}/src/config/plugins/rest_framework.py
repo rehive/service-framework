@@ -1,5 +1,6 @@
 from rest_framework.settings import reload_api_settings
 
+
 ANONYMOUS_USER_ID = -1
 
 CORS_ORIGIN_ALLOW_ALL = True

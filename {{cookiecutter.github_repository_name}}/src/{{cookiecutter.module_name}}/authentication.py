@@ -8,27 +8,6 @@ from rehive import Rehive, APIException
 from .models import Company, User
 
 
-class HeaderAuthentication(authentication.BaseAuthentication):
-    """
-    Authentication utility class.
-    """
-
-    @staticmethod
-    def get_auth_header(request, name="token"):
-        try:
-            auth = request.META['HTTP_AUTHORIZATION'].split()
-        except KeyError:
-            return None
-
-        if not auth or smart_text(auth[0].lower()) != name:
-            return None
-
-        if not auth[1]:
-            return None
-
-        return auth[1]
-
-
 class RehiveAuthentication(authentication.BaseAuthentication):
     # List of Rehive user groups that are allowed.
     # An empty list means all user groups are allowed.

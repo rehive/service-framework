@@ -1,5 +1,6 @@
 import os
 
+
 # TOML file storage
 if os.environ.get('GCLOUD_MEDIA_BUCKET', False):
     DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'

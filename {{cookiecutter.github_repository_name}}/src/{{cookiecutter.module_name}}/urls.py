@@ -3,6 +3,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from . import views
 
+
 urlpatterns = (
     # Public
     re_path(r'^activate/$', views.ActivateView.as_view(), name='activate'),

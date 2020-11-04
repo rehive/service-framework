@@ -1,13 +1,16 @@
 # {{cookiecutter.app_name}}
+
 {{cookiecutter.description}}
 
 ## Prerequisites
+
 Make sure you have the following installed
 - Docker
 - Travis CLI
 - Heroku CLI
 
 ## Local setup
+
 **Create a vitual environment and activate it**
 
 If you are new to this, virtualenv with virtualenvwrapper is a straight forward
@@ -47,6 +50,7 @@ python src/manage.py runserver
 ```
 
 ## Local development
+
 **Run the postgres container in the background (if not already running)**
 ```
 docker-compose up -d postgres
@@ -58,6 +62,7 @@ python src/manage.py manage.py runserver
 ```
 
 ## Deployments
+
 Deployements are automated using Travis CI, Heroku and gcloud.
 Pushes to the master branch will trigger a build via Travis. Once the build passes,
 Travis will deploy the branch to Heroku.

@@ -3,6 +3,7 @@ import uuid
 from rehive import Rehive, APIException
 from rest_framework import serializers
 from django.db import transaction
+from drf_rehive_extras.serializers import BaseModelSerializer
 
 from {{cookiecutter.module_name}}.models import Company, User
 
@@ -130,22 +131,11 @@ class DeactivateSerializer(serializers.Serializer):
         company.admin.save()
 
 
-
-class AdminCompanySerializer(serializers.ModelSerializer):
-    """
-    Serialize company, update and delete.
-    """
+class AdminCompanySerializer(BaseModelSerializer):
     id = serializers.CharField(source='identifier', read_only=True)
     secret = serializers.UUIDField(read_only=True)
-    name = serializers.CharField()
+    name = serializers.CharField(read_only=True)
 
     class Meta:
         model = Company
-        fields = ('id', 'identifier', 'secret', 'name',)
-
-    def update(self, instance, validated_data):
-        for key, value in validated_data.items():
-            setattr(instance, key, value)
-
-        instance.save()
-        return instance
+        fields = ('id', 'secret', 'name',)
