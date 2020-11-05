@@ -22,25 +22,6 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('identifier', models.CharField(db_index=True, max_length=100, unique=True)),
                 ('secret', models.UUIDField()),
-                ('name', models.CharField(blank=True, max_length=100, null=True)),
-            ],
-            options={
-                'abstract': False,
-            },
-        ),
-        migrations.CreateModel(
-            name='Currency',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('code', models.CharField(db_index=True, max_length=12)),
-                ('description', models.CharField(blank=True, max_length=50, null=True)),
-                ('symbol', models.CharField(blank=True, max_length=30, null=True)),
-                ('unit', models.CharField(blank=True, max_length=30, null=True)),
-                ('divisibility', models.IntegerField(default=2)),
-                ('enabled', models.BooleanField(default=True)),
-                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.module_name}}.Company')),
             ],
             options={
                 'abstract': False,
