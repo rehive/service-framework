@@ -61,8 +61,7 @@ class ActivateSerializer(serializers.Serializer):
             )
             company = Company.objects.create(
                 admin=user,
-                identifier=rehive_company.get('id'),
-                name=rehive_company.get('name')
+                identifier=rehive_company.get('id')
             )
             user.company = company
             user.save()
