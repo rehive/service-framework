@@ -13,7 +13,6 @@ class Company(DateModel):
         on_delete=models.CASCADE
     )
     secret = models.UUIDField()
-    name = models.CharField(max_length=100, null=True, blank=True)
     active = models.BooleanField(default=True, blank=False, null=False)
 
     def __str__(self):
