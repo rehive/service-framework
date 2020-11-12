@@ -8,10 +8,10 @@ from rehive import Rehive, APIException
 from .models import Company, User
 
 
-class RehiveAuthentication(authentication.BaseAuthentication):
-    # List of Rehive user groups that are allowed.
-    # An empty list means all user groups are allowed.
-    groups = []
+class HeaderAuthentication(authentication.BaseAuthentication):
+    """
+    Authentication utility class.
+    """
 
     @staticmethod
     def get_auth_header(request, name="token"):
@@ -28,6 +28,13 @@ class RehiveAuthentication(authentication.BaseAuthentication):
 
         return auth[1]
 
+
+class RehiveAuthentication(HeaderAuthentication):
+    """
+    Generic Rehive authentication. Only checks that the token in the
+    authorization header belongs to a vaid user.
+    """
+
     def authenticate(self, request):
         token = self.get_auth_header(request)
         rehive = Rehive(token)
@@ -39,13 +46,6 @@ class RehiveAuthentication(authentication.BaseAuthentication):
 
         try:
             platform_user = rehive.auth.get()
-            # Get a list of groups the user belongs to.
-            groups = [g['name'] for g in platform_user['groups']]
-            # If a list of groups is defined make sure only those groups are
-            # allowed.
-            if (self.groups
-                    and len(set(self.groups).intersection(groups)) <= 0):
-                raise exceptions.AuthenticationFailed(_('Invalid user'))
         except APIException as exc:
             if (hasattr(exc, 'data')):
                 message = exc.data['message']
@@ -73,7 +73,26 @@ class RehiveAuthentication(authentication.BaseAuthentication):
         return user, token
 
 
-class AdminAuthentication(RehiveAuthentication):
+class RehiveGroupAuthentication(RehiveAuthentication):
+    # List of Rehive user groups that are allowed.
+    # An empty list means all user groups are allowed.
+    groups = []
+
+    def authenticate(self, request):
+        user, token = super().authenticate(request)
+
+        # Get a list of groups the user belongs to.
+        groups = [g['name'] for g in user._platform_user['groups']]
+        # If a list of groups is defined make sure only those groups are
+        # allowed.
+        if (self.groups
+                and len(set(self.groups).intersection(groups)) <= 0):
+            raise exceptions.AuthenticationFailed(_('Invalid user'))
+
+        return user, token
+
+
+class AdminAuthentication(RehiveGroupAuthentication):
     """
     Only admin level users can access endpoints under this level.
     """
@@ -81,7 +100,7 @@ class AdminAuthentication(RehiveAuthentication):
     groups = ["admin", "service",]
 
 
-class UserAuthentication(RehiveAuthentication):
+class UserAuthentication(RehiveGroupAuthentication):
     """
     All rehive users can access endpoints under this level.
     """
