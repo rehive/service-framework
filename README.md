@@ -6,6 +6,7 @@
 
 
 ## Features
+
 - Python 3.6
 - Django 2.2.13
 - [Django Rest Framework](http://www.django-rest-framework.org/) integration
@@ -21,6 +22,7 @@ as a method of automation.
  
 
 ## Getting started
+
 Install [cookiecutter](https://github.com/audreyr/cookiecutter). Further documentation for installation can be found [here](https://cookiecutter.readthedocs.io/en/latest/installation.html#install-cookiecutter).
 ```
 # Pip
