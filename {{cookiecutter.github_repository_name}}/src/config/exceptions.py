@@ -28,13 +28,14 @@ class APIError(Exception):
     def __str__(self):
         return self.detail
 
+
 def custom_exception_handler(exc, context):
     """
-        Returns the response that should be used for any given exception.
-        By default we handle the REST framework `APIException`, and also
-        Django's built-in `Http404` and `PermissionDenied` exceptions.
-        Any unhandled exceptions may return `None`, which will cause a 500 error
-        to be raised.
+    Returns the response that should be used for any given exception.
+    By default we handle the REST framework `APIException`, and also
+    Django's built-in `Http404` and `PermissionDenied` exceptions.
+    Any unhandled exceptions may return `None`, which will cause a 500 error
+    to be raised.
     """
     if isinstance(exc, exceptions.APIException):
         headers = {}
