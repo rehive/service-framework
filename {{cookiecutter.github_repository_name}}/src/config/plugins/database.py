@@ -1,11 +1,10 @@
 import os
 
-
 options = {
-    'connect_timeout': 25,
-}
+        'connect_timeout': 25,
+    }
 
-if not os.environ.get('POSTGRES_SSL_DISABLE') in [True, "True", 'true']:
+if not os.environ.get('POSTGRES_SSL_DISABLE'):
     options['sslmode'] = 'require'
 
 DATABASES = {
@@ -16,9 +15,8 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-        'OPTIONS': options
+        'OPTIONS': {
+            'connect_timeout': 25,
+        }
     }
 }
-
-if os.environ.get('DOCKER_NETWORK', False) in [True, 'True', 'true']:
-    DATABASES['default']['PORT'] = '5432'
