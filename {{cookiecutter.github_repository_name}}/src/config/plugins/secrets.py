@@ -1,6 +1,5 @@
 import os
 
-
 # Check if debug variable is there to determine whether loaded
 env_vars_loaded = os.environ.get('DEBUG', '')
 
