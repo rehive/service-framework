@@ -1,5 +1,5 @@
 from django.contrib import admin
-from service_business.models import *
+from {{cookiecutter.module_name}}.models import *
 
 
 class CustomModelAdmin(admin.ModelAdmin):

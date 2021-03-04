@@ -31,8 +31,8 @@ class Company(DateModel):
 class User(DateModel):
     identifier = models.UUIDField(unique=True, db_index=True)
     token = models.CharField(max_length=200, null=True)
-    company = models.ForeignKey
-        ('{{cookiecutter.module_name}}.Company',
+    company = models.ForeignKey(
+        '{{cookiecutter.module_name}}.Company',
         null=True,
         on_delete=models.CASCADE
     )
