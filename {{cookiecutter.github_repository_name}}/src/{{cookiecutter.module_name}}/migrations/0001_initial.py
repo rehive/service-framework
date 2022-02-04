@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True, db_index=True)),
                 ('identifier', models.UUIDField(db_index=True, unique=True)),
                 ('token', models.CharField(max_length=200, null=True)),
-                ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='test_app.company')),
+                ('company', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='{{cookiecutter.module_name}}.Company')),
             ],
             options={
                 'abstract': False,
@@ -43,6 +43,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='company',
             name='admin',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='admin_company', to='test_app.user'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='admin_company', to='{{cookiecutter.module_name}}.User'),
         ),
     ]
