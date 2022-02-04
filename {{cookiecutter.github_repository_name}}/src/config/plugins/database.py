@@ -7,6 +7,7 @@ options = {
 if not os.environ.get('POSTGRES_SSL_DISABLE'):
     options['sslmode'] = 'require'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

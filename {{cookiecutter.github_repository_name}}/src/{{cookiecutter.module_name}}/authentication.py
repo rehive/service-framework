@@ -1,7 +1,7 @@
 import uuid
 
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str
 from rest_framework import authentication, exceptions
 from rehive import Rehive, APIException
 
@@ -20,7 +20,7 @@ class HeaderAuthentication(authentication.BaseAuthentication):
         except KeyError:
             return None
 
-        if not auth or smart_text(auth[0].lower()) != name:
+        if not auth or smart_str(auth[0].lower()) != name:
             return None
 
         if not auth[1]:

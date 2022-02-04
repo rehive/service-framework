@@ -2,14 +2,14 @@ from collections import OrderedDict
 
 import six
 from django.http import Http404
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from rest_framework import status
 from rest_framework import exceptions, status
 from rest_framework.views import set_rollback
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class APIError(Exception):
@@ -19,11 +19,11 @@ class APIError(Exception):
 
     def __init__(self, detail=None, error_slug=None):
         if detail is not None:
-            self.detail = force_text(detail)
-            self.error_slug = force_text(error_slug)
+            self.detail = force_str(detail)
+            self.error_slug = force_str(error_slug)
         else:
-            self.detail = force_text(self.default_detail)
-            self.error_slug = force_text(self.default_error_slug)
+            self.detail = force_str(self.default_detail)
+            self.error_slug = force_str(self.default_error_slug)
 
     def __str__(self):
         return self.detail

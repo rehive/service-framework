@@ -60,5 +60,5 @@ rbac:
 serviceAccount:
   create: true
 postgresParameters:
-  bin_dir: /usr/lib/postgresql/9.6/bin
+  bin_dir: /usr/lib/postgresql/13.0/bin
 useConfigMaps: false
