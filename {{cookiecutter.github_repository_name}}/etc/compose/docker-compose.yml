@@ -36,7 +36,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres:9.6
+    image: postgres:13.0
     ports:
       - '${POSTGRES_PORT}:5432'
     restart: always

@@ -7,10 +7,10 @@
 
 ## Features
 
-- Python 3.6
-- Django 2.2.13
+- Python 3.10
+- Django 4.0.1
 - [Django Rest Framework](http://www.django-rest-framework.org/) integration
-- PostgreSQL 9.6
+- PostgreSQL 13.0
 - Running in a self-contained [Docker](https://www.docker.com/) containers
 - Automatic deployments to Heroku using Travis CI
 
