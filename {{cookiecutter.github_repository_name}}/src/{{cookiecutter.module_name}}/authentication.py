@@ -2,10 +2,25 @@ import uuid
 
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import smart_str
-from rest_framework import authentication, exceptions
+from rest_framework import authentication, exceptions, status
 from rehive import Rehive, APIException
 
 from .models import Company, User
+
+
+class ModifiedAPIException(exceptions.APIException):
+    """
+    Modify the API exception to support defining the status code on the fly.
+
+    This is required for ambiguous errors from the Rehive API.
+    """
+
+    def __init__(self, detail=None, code=None, status_code=None):
+        # Defaults to 500 if not set.
+        if status_code:
+            self.status_code = status_code
+
+        super().__init__(detail, code)
 
 
 class HeaderAuthentication(authentication.BaseAuthentication):
@@ -32,7 +47,7 @@ class HeaderAuthentication(authentication.BaseAuthentication):
 class RehiveAuthentication(HeaderAuthentication):
     """
     Generic Rehive authentication. Only checks that the token in the
-    authorization header belongs to a vaid user.
+    authorization header belongs to a valid user.
     """
 
     def authenticate(self, request):
@@ -40,19 +55,25 @@ class RehiveAuthentication(HeaderAuthentication):
         rehive = Rehive(token)
 
         if not token:
-            raise exceptions.AuthenticationFailed(
+            raise exceptions.PermissionDenied(
                 _("Authentication credentials were not provided.")
             )
 
         try:
             platform_user = rehive.auth.get()
         except APIException as exc:
+            # Try and get a `message` string from the exception data.
             if (hasattr(exc, 'data')):
-                message = exc.data['message']
+                detail = exc.data['message']
             else:
-                message = _('Invalid user')
+                detail = None
+            # Try and get a `status_code` integer from the exception data.
+            if hasattr(exc, 'status_code'):
+                status_code = exc.status_code
+            else:
+                status_code = None
 
-            raise exceptions.AuthenticationFailed(message)
+            raise ModifiedAPIException(detail=detail, status_code=status_code)
 
         try:
             company = Company.objects.get(
@@ -60,7 +81,7 @@ class RehiveAuthentication(HeaderAuthentication):
                 active=True
             )
         except Company.DoesNotExist:
-            raise exceptions.AuthenticationFailed(_("Inactive company."))
+            raise exceptions.ValidationError(_("Inactive company."))
 
         user, created = User.objects.get_or_create(
             identifier=uuid.UUID(platform_user['id']),
@@ -87,7 +108,7 @@ class RehiveGroupAuthentication(RehiveAuthentication):
         # allowed.
         if (self.groups
                 and len(set(self.groups).intersection(groups)) <= 0):
-            raise exceptions.AuthenticationFailed(_('Invalid user'))
+            raise exceptions.PermissionDenied()
 
         return user, token
 
