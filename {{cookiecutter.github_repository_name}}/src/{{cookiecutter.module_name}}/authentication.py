@@ -55,9 +55,7 @@ class RehiveAuthentication(HeaderAuthentication):
         rehive = Rehive(token)
 
         if not token:
-            raise exceptions.PermissionDenied(
-                _("Authentication credentials were not provided.")
-            )
+            raise exceptions.NotAuthenticated()
 
         try:
             platform_user = rehive.auth.get()
