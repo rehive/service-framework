@@ -79,7 +79,9 @@ class RehiveAuthentication(HeaderAuthentication):
                 active=True
             )
         except Company.DoesNotExist:
-            raise exceptions.ValidationError(_("Inactive company."))
+            raise exceptions.ValidationError(
+                {"non_field_errors": [_("Inactive company.")]}
+            )
 
         user, created = User.objects.get_or_create(
             identifier=uuid.UUID(platform_user['id']),
