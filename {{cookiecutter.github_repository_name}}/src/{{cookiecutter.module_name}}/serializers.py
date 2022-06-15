@@ -99,6 +99,7 @@ class DeactivateSerializer(serializers.Serializer):
     user.
     """
     token = serializers.CharField(write_only=True)
+    purge = serializers.BooleanField(default=False)
 
     def validate(self, validated_data):
         token = validated_data.get('token')
@@ -124,6 +125,10 @@ class DeactivateSerializer(serializers.Serializer):
 
     def delete(self):
         company = self.validated_data['company']
+        purge = self.validated_data['purge']
+        if purge:
+            company.delete()
+            return
         company.active = False
         company.admin.token = None
         company.save()
