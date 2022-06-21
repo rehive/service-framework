@@ -99,7 +99,7 @@ class DeactivateSerializer(serializers.Serializer):
     user.
     """
     token = serializers.CharField(write_only=True)
-    purge = serializers.BooleanField(write_only=True, required=False)
+    purge = serializers.BooleanField(write_only=True, required=False, default=False)
 
     def validate(self, validated_data):
         token = validated_data.get('token')
