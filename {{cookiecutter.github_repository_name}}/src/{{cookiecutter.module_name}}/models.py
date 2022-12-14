@@ -3,6 +3,9 @@ import uuid
 
 from django.db import models
 from django_rehive_extras.models import DateModel
+from enumfields import EnumField
+
+from {{cookiecutter.module_name}}.enums import CompanyMode
 
 
 class Company(DateModel):
@@ -14,6 +17,7 @@ class Company(DateModel):
     )
     secret = models.UUIDField()
     active = models.BooleanField(default=True, blank=False, null=False)
+    mode = EnumField(CompanyMode, blank=True, null=True)
 
     def __str__(self):
         return self.identifier
