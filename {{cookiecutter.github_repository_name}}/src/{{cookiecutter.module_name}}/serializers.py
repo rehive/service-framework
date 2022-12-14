@@ -1,11 +1,13 @@
 import uuid
 
+from drf_rehive_extras.fields import EnumField
 from rehive import Rehive, APIException
 from rest_framework import serializers
 from django.db import transaction
 from drf_rehive_extras.serializers import BaseModelSerializer
 
 from {{cookiecutter.module_name}}.models import Company, User
+from {{cookiecutter.module_name}}.enums import CompanyMode
 
 
 class ActivateSerializer(serializers.Serializer):
@@ -61,7 +63,8 @@ class ActivateSerializer(serializers.Serializer):
             )
             company = Company.objects.create(
                 admin=user,
-                identifier=rehive_company.get('id')
+                identifier=rehive_company.get('id'),
+                mode=rehive_company.get('mode')
             )
             user.company = company
             user.save()
@@ -139,7 +142,8 @@ class AdminCompanySerializer(BaseModelSerializer):
     id = serializers.CharField(source='identifier', read_only=True)
     secret = serializers.UUIDField(read_only=True)
     name = serializers.CharField(read_only=True)
+    mode = EnumField(enum=CompanyMode, read_only=True)
 
     class Meta:
         model = Company
-        fields = ('id', 'secret', 'name',)
+        fields = ('id', 'secret', 'name', 'mode')
