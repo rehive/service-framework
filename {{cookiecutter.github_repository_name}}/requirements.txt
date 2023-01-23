@@ -12,3 +12,6 @@ django-healthz==0.0.5
 django-rehive-extras==1.0.0
 drf-rehive-extras==1.0.0
 django-storages[google]==1.12.2
+
+# Task management
+celery==4.3.1
