@@ -32,6 +32,11 @@ def process_platform_webhook(self, webhook_id):
 
 @shared_task
 def process_transaction_initiated_webhook(tx_data, company):
+    """
+    This tasks is triggered whenever a Rehive transaction webhook is recieved
+
+    By default it approves any transaction. This should be updated to handle syncing logic specific to the third party ledger.
+    """
     from rehive import Rehive
     from {{cookiecutter.module_name}}.models import Company, Transaction, Currency
     from {{cookiecutter.module_name}}.utils import from_cents
@@ -52,29 +57,19 @@ def process_transaction_initiated_webhook(tx_data, company):
             transfer = Transfer.create_from_rehive_transfer(tx_data, company)
         elif tx_data.get('tx_type') == 'debit':
             # Native context withdrawal logic
-            elif tx_data.get('metadata') and tx_data.get('metadata').get('native_context'):
-                native_context = tx_data.get('metadata').get('native_context')
-                if native_context.get('send_details'):
-                    # TODO: Handle external sends using the send_details metadata structure
-                    return
-                elif native_context.get('account'):
-                    if native_context.get('type') == 'crypto':
-                        # TODO: Handle external sends using the crypto metadata structure
-                        return
-                    elif native_context.get('type') == 'fiat':
-                        # TODO: Handle external sends using the bank account metadata structure
-                        return
+            transfer = Transfer.create_from_rehive_debit(tx_data, company)
         elif (tx_data.get('tx_type') == 'credit':
             # First check if this is actually a transfer created by the service
             try:
-                # Get by the metadata wyre_id to prevent race conditions
-                if (tx_data.get('metadata') and tx_data.get('metadata').get('{{cookiecutter.module_name}}') and tx_data.get('metadata').get('{{cookiecutter.module_name}}').get('wyre_id')):
+                # Get by the metadata third party id to prevent race conditions
+                if (tx_data.get('metadata') and tx_data.get('metadata').get('{{cookiecutter.module_name}}') and tx_data.get('metadata').get('{{cookiecutter.module_name}}').get('id')):
                     Transfer.objects.get(
-                        wyre_id=tx_data.get('metadata').get('{{cookiecutter.module_name}}').get('wyre_id'),
+                        third_party_id=tx_data.get('metadata').get('{{cookiecutter.module_name}}').get('id'),
                         native_id=tx_data.get('id')
                     )
                 else:
-                    logger.info('Manual credits can not be processed. Failing.')
+                    # Manual credits should be failed
+                    # TODO: Add error message to transaction errors list
                     rehive = Rehive(company.admin.token)
                     rehive_tx = rehive.admin.transactions.fail(
                         tx_data.get('id'),
@@ -84,8 +79,8 @@ def process_transaction_initiated_webhook(tx_data, company):
                     )
                     return
             except Transfer.DoesNotExist:
-                # For now just fail any manual credits
-                logger.info('Manual credits can not be processed. Failing.')
+                # Manual credits should be failed
+                # TODO: Add error message to transaction errors list
                 rehive = Rehive(company.admin.token)
                 rehive_tx = rehive.admin.transactions.fail(
                     tx_data.get('id'),
@@ -96,8 +91,6 @@ def process_transaction_initiated_webhook(tx_data, company):
                 return
     except Exception as exc:
         # TODO: Add better error handling logic
-        logger.info(exc)
-        logger.info('Failed to process Rehive tx on Wyre. Failing.')
         rehive = Rehive(company.admin.token)
         rehive_tx = rehive.admin.transactions.fail(
             tx_data.get('id'),

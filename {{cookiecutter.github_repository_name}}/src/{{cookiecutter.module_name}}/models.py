@@ -6,6 +6,7 @@ from django_rehive_extras.models import DateModel
 from enumfields import EnumField
 
 from {{cookiecutter.module_name}}.enums import CompanyMode
+from {{cookiecutter.module_name}}.utils import from_cents, to_cents
 
 
 class Company(DateModel):
@@ -115,10 +116,16 @@ class Transaction(DateModel):
         default=uuid.uuid4
     )
     amount = MoneyField(default=Decimal(0), null=True, blank=True)
+    currency = models.ForeignKey(
+        '{{cookiecutter.module_name}}.Currency',
+        null=True,
+        on_delete=models.CASCADE
+    )
     native_id = models.CharField(max_length=200, null=True)
     native_partner_id = models.CharField(max_length=200, null=True)
     native_collection_id = models.CharField(max_length=200, null=True, blank=True)
     native_response = JSONField(null=True, blank=True)
+    native_metadata = JSONField(null=True, blank=True)
     third_party_id = models.CharField(max_length=200, null=False)
     third_party_data = JSONField(null=True, blank=True)
     third_party_error = models.TextField(null=True)
@@ -144,14 +151,37 @@ class Transaction(DateModel):
         """
         Updates Rehive with the models stored data
         """
-        raise Exception('Not implemented')
+        rehive = Rehive(self.company.admin.token)
+        
+        if self.status == TransactionStatusEnum.COMPLETE:
+            r = rehive.admin.transaction_collections.confirm(
+                self.native_collection_id,
+                metadata=self.generate_rehive_metadata()
+            )
+        elif self.status == TransactionStatusEnum.FAILED:
+            r = rehive.admin.transaction_collections.fail(
+                self.native_collection_id,
+                metadata=self.generate_rehive_metadata()
+            )
+        self.native_response = r.json()
+        self.save()
+        return self
             
 
     def update_third_party_ledger_from_model(self):
         """
         Updates the third party ledger with the models stored data
         """
-        raise Exception('Not implemented')
+        # TODO: Remove this and include custom third party calling logic. For now this just assumes a success and keeps moving.
+        successfully_completed_on_third_party = True
+        if successfully_completed_on_third_party:
+            self.status = TransactionStatusEnum.COMPLETE
+        else:
+            self.status = TransactionStatusEnum.FAILED
+        self.save()
+        self.update_rehive_from_model()
+        return self
+        
     
     def generate_rehive_metadata(self):
         """
@@ -165,6 +195,44 @@ class Transaction(DateModel):
             }
         }
         return metadata
+
+
+    @classmethod
+    def create_from_rehive_transfer(cls, tx_data, company):
+        currency = Currency.objects.get(
+            code=tx_data.get('currency').get('code'),
+            company=company
+        )
+        transfer = cls.objects.create(
+            amount=from_cents(
+                abs(tx_data.get('amount')),
+                currency.divisibility
+            ),
+            native_metadata=tx_data.get('metadata'),
+            native_id=tx_data.get('id'),
+            native_collection_id=tx_data.get('collection_id'),
+            native_partner_id=tx_data.get('partner').get('id'),
+            status=TransactionStatusEnum.PENDING
+        )
+        transfer.update_third_party_ledger_from_model()
+    
+    @classmethod
+    def create_from_rehive_debit(cls, tx_data, company):
+        currency = Currency.objects.get(
+            code=tx_data.get('currency').get('code'),
+            company=company
+        )
+        transfer = cls.objects.create(
+            amount=from_cents(
+                abs(tx_data.get('amount')),
+                currency.divisibility
+            ),
+            native_metadata=tx_data.get('metadata'),
+            native_id=tx_data.get('id'),
+            native_collection_id=tx_data.get('collection_id'),
+            status=TransactionStatusEnum.PENDING
+        )
+        transfer.update_third_party_ledger_from_model()
 
 
 class PlatformWebhook(DateModel):
