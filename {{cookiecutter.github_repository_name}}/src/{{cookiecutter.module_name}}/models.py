@@ -116,6 +116,11 @@ class Transaction(DateModel):
         default=uuid.uuid4
     )
     amount = MoneyField(default=Decimal(0), null=True, blank=True)
+    company = models.ForeignKey(
+        '{{cookiecutter.module_name}}.Company',
+        null=True,
+        on_delete=models.CASCADE
+    )
     currency = models.ForeignKey(
         '{{cookiecutter.module_name}}.Currency',
         null=True,
@@ -197,13 +202,17 @@ class Transaction(DateModel):
         return metadata
 
 
+    def update_rehive_error_objects(self):
+        return
+
+
     @classmethod
     def create_from_rehive_transfer(cls, tx_data, company):
         currency = Currency.objects.get(
             code=tx_data.get('currency').get('code'),
             company=company
         )
-        transfer = cls.objects.create(
+        transaction = cls.objects.create(
             amount=from_cents(
                 abs(tx_data.get('amount')),
                 currency.divisibility
@@ -212,9 +221,10 @@ class Transaction(DateModel):
             native_id=tx_data.get('id'),
             native_collection_id=tx_data.get('collection_id'),
             native_partner_id=tx_data.get('partner').get('id'),
-            status=TransactionStatusEnum.PENDING
+            status=TransactionStatusEnum.PENDING,
+            company=company
         )
-        transfer.update_third_party_ledger_from_model()
+        transaction.update_third_party_ledger_from_model()
     
     @classmethod
     def create_from_rehive_debit(cls, tx_data, company):
@@ -222,7 +232,7 @@ class Transaction(DateModel):
             code=tx_data.get('currency').get('code'),
             company=company
         )
-        transfer = cls.objects.create(
+        transaction = cls.objects.create(
             amount=from_cents(
                 abs(tx_data.get('amount')),
                 currency.divisibility
@@ -230,9 +240,10 @@ class Transaction(DateModel):
             native_metadata=tx_data.get('metadata'),
             native_id=tx_data.get('id'),
             native_collection_id=tx_data.get('collection_id'),
-            status=TransactionStatusEnum.PENDING
+            status=TransactionStatusEnum.PENDING,
+            company=company
         )
-        transfer.update_third_party_ledger_from_model()
+        transaction.update_third_party_ledger_from_model()
 
 
 class PlatformWebhook(DateModel):

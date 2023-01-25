@@ -6,8 +6,11 @@ from rest_framework import serializers
 from django.db import transaction
 from drf_rehive_extras.serializers import BaseModelSerializer
 
-from {{cookiecutter.module_name}}.models import Company, User
-from {{cookiecutter.module_name}}.enums import CompanyMode
+from {{cookiecutter.module_name}}.models import (
+    Company, User, Transaction, ExternalCurrency,
+    Currency
+)
+from {{cookiecutter.module_name}}.enums import CompanyMode, TransactionStatusEnum
 
 
 class ActivateSerializer(serializers.Serializer):
@@ -147,3 +150,94 @@ class AdminCompanySerializer(BaseModelSerializer):
     class Meta:
         model = Company
         fields = ('id', 'secret', 'name', 'mode')
+
+
+class ExternalCurrencySerializer(BaseModelSerializer):
+
+    class Meta:
+        model = ExternalCurrency
+        fields = (
+            'code',
+            'divisibility',
+            'description',
+            'is_crypto',
+            'chain',
+            'base_chain_code'
+        )
+
+
+class CurrencySerializer(BaseModelSerializer):
+    
+    class Meta:
+        model = Currency
+        fields = (
+            'company',
+            'code',
+            'display_code',
+            'symbol',
+            'unit',
+            'divisibility',
+            'is_crypto',
+            'external_currency'
+        )
+
+
+class AdminCurrencySerializer(CurrencySerializer):
+    
+    class Meta:
+        model = Currency
+        fields = (
+            'company',
+            'code',
+            'display_code',
+            'symbol',
+            'unit',
+            'divisibility',
+            'is_crypto',
+            'external_currency',
+        )
+        read_only_fields = (
+            'company',
+            'code',
+            'display_code',
+            'symbol',
+            'unit',
+            'divisibility',
+            'is_crypto',
+        )
+    
+    def update(self, instance, validated_data):
+        if validated_data.get('external_currency'):
+            try:
+                external_currency = ExternalCurrency.objects.get(
+                    code=validated_data.get('external_currency')
+                )
+                if external_currency.divisibility != instance.divisibility:
+                    raise serializers.ValidationError(
+                        {"error": ["The external currency and native currency divisibility need to match."]}
+                    ) 
+                validated_data['external_currency'] = external_currency
+            except ExternalCurrency.DoesNotExist as exc:
+                raise serializers.ValidationError(
+                    {"error": ["External currency code not supported."]}
+                )
+        return super().update(instance, validated_data)
+
+
+class TransactionSerializer(BaseModelSerializer):
+
+    status = EnumField(TransferStatusEnum, read_only=True, required=False)
+    
+    class Meta:
+        model = Currency
+        fields = (
+            'identifier',
+            'amount',
+            'company',
+            'currency',
+            'native_id',
+            'native_partner_id',
+            'native_collection_id',
+            'third_party_id',
+            'status'
+        )
