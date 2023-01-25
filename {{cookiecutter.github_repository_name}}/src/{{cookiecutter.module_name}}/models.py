@@ -164,10 +164,13 @@ class Transaction(DateModel):
                 metadata=self.generate_rehive_metadata()
             )
         elif self.status == TransactionStatusEnum.FAILED:
+            # Fail the transaction
             r = rehive.admin.transaction_collections.fail(
                 self.native_collection_id,
                 metadata=self.generate_rehive_metadata()
             )
+            # Append the failure reasons
+            self.update_rehive_error_objects()
         self.native_response = r.json()
         self.save()
         return self
@@ -203,7 +206,20 @@ class Transaction(DateModel):
 
 
     def update_rehive_error_objects(self):
-        return
+        rehive = Rehive(self.company.admin.token)
+        if self.native_id:
+            rehive.admin.transactions.obj(self.native_id).messages.create(
+                level='error',
+                section='user',
+                message=self.third_party_error
+            )
+        if self.native_partner_id:
+            rehive.admin.transactions.obj(self.native_partner_id).messages.create(
+                level='error',
+                section='user',
+                message=self.third_party_error
+            )
+
 
 
     @classmethod
