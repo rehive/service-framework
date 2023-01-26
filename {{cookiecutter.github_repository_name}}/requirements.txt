@@ -14,4 +14,9 @@ drf-rehive-extras==1.0.0
 django-storages[google]==1.12.2
 
 # Task management
-celery==4.3.1
+celery==5.2.3
+kombu==5.2.3
+msgpack==1.0.3
+amqp==5.0.9
+billiard==3.6.4.0
+vine==5.0.0
