@@ -96,6 +96,78 @@ class ActivateSerializer(serializers.Serializer):
                 company.active = True
                 company.save()
 
+        # Add required currencies to service automatically.
+        if currencies:
+            for kwargs in currencies:
+                currency = Currency.objects.get_or_create(
+                    code=kwargs['code'],
+                    company=company,
+                    defaults={
+                        "display_code": kwargs['display_code'],
+                        "description": kwargs['description'],
+                        "symbol": kwargs['symbol'],
+                        "unit": kwargs['unit'],
+                        "divisibility": kwargs['divisibility']
+                    }
+                )
+
+        # Setup webhooks
+        service_url = os.environ.get('BASE_DOMAIN')
+
+        # Additional webhooks can be added as needed
+        webhooks = (
+            {
+                "url": '/api/webhook/',
+                'event': WebhookEvent.TRANSACTION_EXECUTE.value,
+            },
+            {
+                "url": '/api/webhook/',
+                'event': WebhookEvent.TRANSACTION_INITIATE.value,
+            },
+            {
+                "url": '/api/webhook/',
+                "event": WebhookEvent.CURRENCY_CREATE.value,
+            },
+            {
+                "url": '/api/webhook/',
+                "event": WebhookEvent.CURRENCY_UPDATE.value,
+            }
+        )
+
+        for webhook in webhooks:
+            try:
+                rehive.admin.webhooks.create(
+                    url=urljoin(service_url, webhook.get('url')),
+                    event=webhook.get('event'),
+                    secret=str(company.secret),
+                )
+            except APIException as e:
+                if e.status_code == 400:
+                    if 'A webhook with the url and event already exists.' == str(e):
+                        logger.info('Webhook exists. Skipping.')
+                        continue 
+                logger.error('Error creating webhook')
+                logger.error(e)
+                raise serializers.ValidationError(
+                    'Error creating Rehive webhooks'
+                )
+
+        # If the service uses custom subtypes they can be included in this array to be added on activation
+        required_subtypes = []
+        try:
+            for rs in required_subtypes:
+                if (rs['name'] not in [s['name'] for s in subtypes
+                        if s['tx_type'] == rs['tx_type']]):
+                    rehive.admin.subtypes.create(
+                        name=rs['name'],
+                        label=rs.get("label"),
+                        description=rs.get("description"),
+                        tx_type=rs['tx_type']
+                    )
+        except RehiveAPIException:
+            raise serializers.ValidationError(
+                {"non_field_errors": ["Unable to configure subtypes."]})
+
         return company
 
 

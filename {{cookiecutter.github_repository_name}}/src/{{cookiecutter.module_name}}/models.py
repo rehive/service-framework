@@ -1,11 +1,14 @@
 import datetime
 import uuid
 
+from decimal import Decimal
 from django.db import models
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django_rehive_extras.models import DateModel
+from django_rehive_extras.fields import MoneyField
 from enumfields import EnumField
 
-from {{cookiecutter.module_name}}.enums import CompanyMode
+from {{cookiecutter.module_name}}.enums import CompanyMode, TransactionStatusEnum, WebhookEvent, APISelectionEnum
 from {{cookiecutter.module_name}}.utils import from_cents, to_cents
 
 
@@ -57,7 +60,6 @@ class ExternalCurrency(DateModel):
     description = models.CharField(max_length=255, null=True, blank=True)
     is_crypto = models.BooleanField(default=False, blank=False, null=False)
     chain = models.CharField(max_length=30, null=True, blank=True)
-    base_chain_code = models.CharField(max_length=30, db_index=True)
     destination_prefix = models.CharField(max_length=50, null=True, blank=True)
 
 
@@ -157,7 +159,14 @@ class Transaction(DateModel):
         Updates Rehive with the models stored data
         """
         rehive = Rehive(self.company.admin.token)
-        
+        # TODO: Add better Rehive error handling
+        # TODO: Move this into something that can handle retries
+        # Store an error field - connection_error etc
+        # Use idompotency for retries
+            # Need some manual way to sort out idom errors
+        # Create a seperate TransactionTask model which stores the calls the service makes to either Rehive or the third party
+            # Last sync'd datefield for both APIs
+            # Has sync'd boolean for either API - could store the syncing errors and show if things should be retried or not
         if self.status == TransactionStatusEnum.COMPLETE:
             r = rehive.admin.transaction_collections.confirm(
                 self.native_collection_id,
@@ -187,7 +196,6 @@ class Transaction(DateModel):
         else:
             self.status = TransactionStatusEnum.FAILED
         self.save()
-        self.update_rehive_from_model()
         return self
         
     
@@ -200,6 +208,11 @@ class Transaction(DateModel):
         metadata = {
             '{{cookiecutter.module_name}}_context': {
                 'id': str(self.third_party_id)
+            },
+            'native_context': {
+                'transaction_display_details': {
+                    'hash': self.third_party_data.get('hash')
+                }
             }
         }
         return metadata
@@ -221,9 +234,9 @@ class Transaction(DateModel):
             )
 
 
-
     @classmethod
     def create_from_rehive_transfer(cls, tx_data, company):
+        # TODO: Combine these two functions
         currency = Currency.objects.get(
             code=tx_data.get('currency').get('code'),
             company=company
@@ -241,6 +254,7 @@ class Transaction(DateModel):
             company=company
         )
         transaction.update_third_party_ledger_from_model()
+        transaction.update_rehive_from_model()
     
     @classmethod
     def create_from_rehive_debit(cls, tx_data, company):
@@ -260,6 +274,40 @@ class Transaction(DateModel):
             company=company
         )
         transaction.update_third_party_ledger_from_model()
+        transaction.update_rehive_from_model()
+
+
+class TransactionSyncTask(DateModel):
+    """
+    Model which stores the attempts and responses made to update a third party with internal transaction data
+    """
+    identifier = models.UUIDField(
+        unique=True,
+        db_index=True,
+        default=uuid.uuid4
+    )
+    transaction = models.ForeignKey(
+        '{{cookiecutter.module_name}}.Transaction',
+        null=True,
+        on_delete=models.CASCADE
+    )
+    transaction_snapshot = JSONField(null=True, blank=True)
+    api = EnumField(APISelectionEnum, max_length=100, null=True, blank=True)
+    api_response = JSONField(null=True, blank=True)
+    completed = models.DateTimeField(null=True)
+    failed = models.DateTimeField(null=True)
+    tries = models.IntegerField(default=0)
+
+    # Max number of retries allowed.
+    MAX_RETRIES = 6
+
+    def process(self):
+        # Sync transaction with Rehive
+        if self.api == APISelectionEnum.NATIVE:
+            
+        # Sync transaction with third party
+        elif self.api == APISelectionEnum.THIRD_PARTY:
+
 
 
 class PlatformWebhook(DateModel):
