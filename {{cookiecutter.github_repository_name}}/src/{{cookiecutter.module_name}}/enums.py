@@ -41,9 +41,9 @@ class TransactionStatusEnum(Enum):
 
 
 class APISelectionEnum(Enum):
-    NATIVE = 'NATIVE'
+    REHIVE = 'REHIVE'
     THIRD_PARTY = 'THIRD_PARTY'
 
     class Labels:
-        NATIVE = 'NATIVE'
+        REHIVE = 'REHIVE'
         THIRD_PARTY = 'THIRD_PARTY'

@@ -1,5 +1,6 @@
 import datetime
 import uuid
+import requests
 
 from decimal import Decimal
 from django.db import models
@@ -277,37 +278,71 @@ class Transaction(DateModel):
         transaction.update_rehive_from_model()
 
 
-class TransactionSyncTask(DateModel):
+class ExternalSyncTask(DateModel):
     """
-    Model which stores the attempts and responses made to update a third party with internal transaction data
+    Model which stores the attempts and responses made to update a third party with internal data
+
+    The task objects should be generated from the third party or Rehive API classes
     """
     identifier = models.UUIDField(
         unique=True,
         db_index=True,
         default=uuid.uuid4
     )
-    transaction = models.ForeignKey(
-        '{{cookiecutter.module_name}}.Transaction',
-        null=True,
-        on_delete=models.CASCADE
-    )
-    transaction_snapshot = JSONField(null=True, blank=True)
+    data = JSONField(null=True, blank=True)
+    url = models.CharField(max_length=200, null=True)
+    headers = JSONField(null=True, blank=True)
+    method = models.CharField(max_length=50, null=False)
     api = EnumField(APISelectionEnum, max_length=100, null=True, blank=True)
     api_response = JSONField(null=True, blank=True)
     completed = models.DateTimeField(null=True)
     failed = models.DateTimeField(null=True)
     tries = models.IntegerField(default=0)
 
-    # Max number of retries allowed.
-    MAX_RETRIES = 6
+    # Max number of retries allowed. We only want to retry on connection errors.
+    # Retries should only be incremented if the API called supports proper idompotency
+    MAX_RETRIES_REHIVE = 6
+    MAX_RETRIES_THIRD_PARTY = 1
 
     def process(self):
-        # Sync transaction with Rehive
-        if self.api == APISelectionEnum.NATIVE:
-            
-        # Sync transaction with third party
-        elif self.api == APISelectionEnum.THIRD_PARTY:
-
+        self.tries = self.tries + 1
+        try:
+            if self.api == APISelectionEnum.REHIVE:
+                headers = self.headers
+                headers['Idempotency-Key'] = str(self.identifier)
+                try:
+                    # process Rehive sync
+                    r = requests.request(
+                        self.method,
+                        headers=headers,
+                        data=self.data,
+                        url=self.url
+                    )
+                except Exception as exc:
+                    self.failed = now() if self.tries > self.MAX_RETRIES_REHIVE else None
+                    self.save()
+                    logger.exception(exc)
+                    raise ExternalSyncTaskProcessingError(exc)
+                else:
+                    self.completed = now()
+                    self.save()
+            elif self.api == APISelectionEnum.THIRD_PARTY:
+                try:
+                    # process third party sync
+                    r = requests.request(
+                        self.method,
+                        headers=self.headers,
+                        data=self.data,
+                        url=self.url
+                    )
+                except Exception as exc:
+                    self.failed = now() if self.tries > self.MAX_RETRIES_THIRD_PARTY else None
+                    self.save()
+                    logger.exception(exc)
+                    raise ExternalSyncTaskProcessingError(exc)
+                else:
+                    self.completed = now()
+                    self.save()
 
 
 class PlatformWebhook(DateModel):
