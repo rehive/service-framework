@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from logging import getLogger
 
 from django.http import Http404
 from django.utils.encoding import force_str
@@ -12,6 +13,9 @@ from django_rehive_extras.exceptions import DjangoBaseException
 
 from config import settings
 from {{cookiecutter.module_name}}.authentication import RehiveAPIException
+
+
+logger = getLogger('django')
 
 
 class APIError(Exception):
