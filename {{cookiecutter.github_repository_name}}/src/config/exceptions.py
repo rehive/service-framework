@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django_rehive_extras.exceptions import DjangoBaseException
 
 from config import settings
-from .authentication import RehiveAPIException
+from {{cookiecutter.module_name}}.authentication import RehiveAPIException
 
 
 class APIError(Exception):
