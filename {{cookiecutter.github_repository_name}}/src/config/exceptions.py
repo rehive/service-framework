@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-import six
 from django.http import Http404
 from django.utils.encoding import force_str
 from rest_framework import status
@@ -8,8 +7,11 @@ from rest_framework import exceptions, status
 from rest_framework.views import set_rollback
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-
 from django.utils.translation import gettext_lazy as _
+from django_rehive_extras.exceptions import DjangoBaseException
+
+from config import settings
+from .authentication import RehiveAPIException
 
 
 class APIError(Exception):
@@ -32,11 +34,14 @@ class APIError(Exception):
 def custom_exception_handler(exc, context):
     """
     Returns the response that should be used for any given exception.
+
     By default we handle the REST framework `APIException`, and also
     Django's built-in `Http404` and `PermissionDenied` exceptions.
+
     Any unhandled exceptions may return `None`, which will cause a 500 error
     to be raised.
     """
+
     if isinstance(exc, exceptions.APIException):
         headers = {}
         if getattr(exc, 'auth_header', None):
@@ -44,7 +49,20 @@ def custom_exception_handler(exc, context):
         if getattr(exc, 'wait', None):
             headers['Retry-After'] = '%d' % exc.wait
 
-        if isinstance(exc.detail, (list, dict)):
+        # Special handling Rehive API exceptions.
+        if isinstance(exc, RehiveAPIException):
+            if hasattr(exc, "data"):
+                data = OrderedDict([
+                    ('status', 'error'),
+                    ('message', exc.detail),
+                    ('data', exc.data)
+                ])
+            else:
+                data = OrderedDict([
+                    ('status', 'error'), ('message', exc.detail)
+                ])
+
+        elif isinstance(exc.detail, (list, dict)):
             # Concatenate all field and non_field errors for message:
             message = ''
 
@@ -67,7 +85,9 @@ def custom_exception_handler(exc, context):
             if message.endswith(' '):
                 message = message[:-1] # remove last space
 
-            data = OrderedDict([('status', 'error'), ('message', message), ('data', exc.detail)])
+            data = OrderedDict([
+                ('status', 'error'), ('message', message), ('data', exc.detail)
+            ])
         else:
             data = OrderedDict([('status', 'error'), ('message', exc.detail)])
 
@@ -76,17 +96,32 @@ def custom_exception_handler(exc, context):
 
     elif isinstance(exc, Http404):
         msg = _('Not found.')
-        data = {'status': 'error', 'message': six.text_type(msg)}
+        data = {'status': 'error', 'message': msg}
 
         set_rollback()
         return Response(data, status=status.HTTP_404_NOT_FOUND)
 
     elif isinstance(exc, PermissionDenied):
         msg = _('Permission denied.')
-        data = {'status': 'error', 'message': six.text_type(msg)}
+        data = {'status': 'error', 'message': msg}
 
         set_rollback()
         return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+    elif isinstance(exc, DjangoBaseException):
+        data = {'status': 'error', 'message': exc.default_detail}
+
+        set_rollback()
+        return Response(data, status=exc.status_code)
+
+    # If debug is false return a formatted error and raise an internal error.
+    if not settings.DEBUG:
+        logger.exception(exc)
+        exc = DjangoBaseException()
+        return Response(
+            {'status': 'error', 'message': exc.default_detail},
+            status=exc.status_code
+        )
 
     # Note: Unhandled exceptions will raise a 500 error.
     return None

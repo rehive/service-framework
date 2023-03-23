@@ -8,17 +8,23 @@ from rehive import Rehive, APIException
 from .models import Company, User
 
 
-class ModifiedAPIException(exceptions.APIException):
+class RehiveAPIException(exceptions.APIException):
     """
-    Modify the API exception to support defining the status code on the fly.
+    Modify the API exception to support optionally setting the following values:
+
+    - status_code
+    - data
 
     This is required for ambiguous errors from the Rehive API.
     """
 
-    def __init__(self, detail=None, code=None, status_code=None):
+    def __init__(self, detail=None, code=None, status_code=None, data=None):
         # Defaults to 500 if not set.
         if status_code:
             self.status_code = status_code
+
+        if data:
+            self.data = data
 
         super().__init__(detail, code)
 
@@ -50,6 +56,42 @@ class RehiveAuthentication(HeaderAuthentication):
     authorization header belongs to a valid user.
     """
 
+    def _raise_exception(self, exc):
+        """
+        Raise a custom exception for authentication/authorization.
+        """
+
+        # Try and get a `data` object from the exception data.
+        if (hasattr(exc, 'data')):
+            data = exc.data
+        else:
+            data = None
+
+        # Try and get a `status_code` integer from the exception data.
+        if hasattr(exc, 'status_code'):
+            status_code = exc.status_code
+        else:
+            status_code = None
+
+        # Populate the `message` and `data` vars from the exception data.
+        if data:
+            try:
+                message = data['message']
+            except KeyError:
+                message = None
+
+            try:
+                data = data['data']
+            except KeyError:
+                data = None
+        else:
+            message = None
+            data = None
+
+        raise RehiveAPIException(
+            detail=message, status_code=status_code, data=data
+        )
+
     def authenticate(self, request):
         token = self.get_auth_header(request)
         rehive = Rehive(token)
@@ -60,18 +102,7 @@ class RehiveAuthentication(HeaderAuthentication):
         try:
             platform_user = rehive.auth.get()
         except APIException as exc:
-            # Try and get a `message` string from the exception data.
-            if (hasattr(exc, 'data')):
-                detail = exc.data['message']
-            else:
-                detail = None
-            # Try and get a `status_code` integer from the exception data.
-            if hasattr(exc, 'status_code'):
-                status_code = exc.status_code
-            else:
-                status_code = None
-
-            raise ModifiedAPIException(detail=detail, status_code=status_code)
+            self._raise_exception(exc)
 
         try:
             company = Company.objects.get(
