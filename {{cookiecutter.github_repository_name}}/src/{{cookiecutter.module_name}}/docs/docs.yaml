@@ -1,0 +1,13 @@
+conversion.views.ActivateView:
+    POST:
+        summary: Activate service
+conversion.views.DeactivateView:
+    POST:
+        summary: Deactivate service
+conversion.views.AdminCompanyView:
+    GET:
+        summary: Retrieve company
+    PUT:
+        summary: Update company
+    PATCH:
+        summary: Partially update company

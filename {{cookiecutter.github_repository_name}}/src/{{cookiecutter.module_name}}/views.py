@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view, permission_classes
 from drf_rehive_extras.generics import *
+from drf_rehive_extras.serializers import ActionResponseSerializer
 
 from {{cookiecutter.module_name}}.authentication import AdminAuthentication
 from {{cookiecutter.module_name}}.serializers import (
@@ -22,27 +23,27 @@ logger = getLogger('django')
 Activation Endpoints
 """
 
-
-class ActivateView(CreateAPIView):
-    permission_classes = (AllowAny, )
+class ActivateView(ActionAPIView):
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
     serializer_class = ActivateSerializer
+    serializer_classes = {
+        "POST": (ActivateSerializer, ActionResponseSerializer,)
+    }
 
 
-class DeactivateView(CreateAPIView):
-    permission_classes = (AllowAny, )
+class DeactivateView(ActionAPIView):
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
     serializer_class = DeactivateSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.delete()
-        return Response({'status': 'success'})
+    serializer_classes = {
+        "POST": (DeactivateSerializer, ActionResponseSerializer,)
+    }
 
 
 """
 Admin Endpoints
 """
-
 
 class AdminCompanyView(RetrieveUpdateAPIView):
     serializer_class = AdminCompanySerializer
