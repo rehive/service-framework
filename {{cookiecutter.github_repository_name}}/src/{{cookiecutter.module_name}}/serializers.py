@@ -102,7 +102,9 @@ class DeactivateSerializer(serializers.Serializer):
     user.
     """
     token = serializers.CharField(write_only=True)
-    purge = serializers.BooleanField(write_only=True, required=False, default=False)
+    purge = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     def validate(self, validated_data):
         token = validated_data.get('token')
@@ -126,9 +128,13 @@ class DeactivateSerializer(serializers.Serializer):
 
         return validated_data
 
-    def delete(self):
-        company = self.validated_data['company']
-        purge = self.validated_data.get('purge', False)
+    def create(self, validated_data):
+        """
+        Modify the create to deactivate the company.
+        """
+
+        company = validated_data.get('company')
+        purge = validated_data.get('purge', False)
         if purge is True:
             company.delete()
             return
@@ -136,6 +142,8 @@ class DeactivateSerializer(serializers.Serializer):
         company.admin.token = None
         company.save()
         company.admin.save()
+
+        return validated_data
 
 
 class AdminCompanySerializer(BaseModelSerializer):
@@ -146,4 +154,4 @@ class AdminCompanySerializer(BaseModelSerializer):
 
     class Meta:
         model = Company
-        fields = ('id', 'secret', 'name', 'mode')
+        fields = ('id', 'secret', 'name', 'mode',)

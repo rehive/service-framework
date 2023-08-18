@@ -10,7 +10,11 @@ urlpatterns = (
     re_path(r'^deactivate/$', views.DeactivateView.as_view(), name='deactivate'),
 
     # Admin
-    re_path(r'^admin/company/$', views.AdminCompanyView.as_view(), name='admin-company')
+    re_path(
+        r'^admin/company/$',
+        views.AdminCompanyView.as_view(),
+        name='admin-company'
+    )
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
