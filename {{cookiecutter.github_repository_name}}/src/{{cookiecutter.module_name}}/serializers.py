@@ -137,7 +137,7 @@ class DeactivateSerializer(serializers.Serializer):
         purge = validated_data.get('purge', False)
         if purge is True:
             company.delete()
-            return
+            return validated_data
         company.active = False
         company.admin.token = None
         company.save()
