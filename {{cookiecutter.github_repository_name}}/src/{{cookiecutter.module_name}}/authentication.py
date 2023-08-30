@@ -8,23 +8,22 @@ from rehive import Rehive, APIException
 from .models import Company, User
 
 
-class RehiveAPIException(exceptions.APIException):
+class AuthenticationAPIException(exceptions.APIException):
     """
     Modify the API exception to support optionally setting the following values:
 
     - status_code
-    - data
+    - message
 
     This is required for ambiguous errors from the Rehive API.
     """
 
-    def __init__(self, detail=None, code=None, status_code=None, data=None):
-        # Defaults to 500 if not set.
+    def __init__(self, detail=None, code=None, status_code=None, message=None):
         if status_code:
             self.status_code = status_code
 
-        if data:
-            self.data = data
+        if message:
+            self.message = message
 
         super().__init__(detail, code)
 
@@ -61,35 +60,35 @@ class RehiveAuthentication(HeaderAuthentication):
         Raise a custom exception for authentication/authorization.
         """
 
-        # Try and get a `data` object from the exception data.
-        if (hasattr(exc, 'data')):
-            data = exc.data
-        else:
-            data = None
-
-        # Try and get a `status_code` integer from the exception data.
-        if hasattr(exc, 'status_code'):
+        try:
             status_code = exc.status_code
-        else:
+        except AttributeError:
             status_code = None
 
-        # Populate the `message` and `data` vars from the exception data.
-        if data:
-            try:
-                message = data['message']
-            except KeyError:
-                message = None
+        # Raise the error as is, if it has un unexpected error status.
+        if (not status_code or status_code not in (
+                    status.HTTP_400_BAD_REQUEST,
+                    status.HTTP_401_UNAUTHORIZED,
+                    status.HTTP_403_FORBIDDEN,
+                )):
+            raise exc
 
-            try:
-                data = data['data']
-            except KeyError:
-                data = None
-        else:
-            message = None
+        # Otherwise try and get the data and message from the error.
+        try:
+            data = exc.data['data']
+        except (AttributeError, TypeError, KeyError):
             data = None
 
-        raise RehiveAPIException(
-            detail=message, status_code=status_code, data=data
+        try:
+            message = exc.data['message']
+        except (AttributeError, TypeError, KeyError):
+            message = None
+
+        # Use either the data or the message exists.
+        detail = data or message
+
+        raise AuthenticationAPIException(
+            detail=detail, status_code=status_code, message=message
         )
 
     def authenticate(self, request):

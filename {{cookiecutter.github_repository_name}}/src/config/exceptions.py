@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 from django_rehive_extras.exceptions import DjangoBaseException
 
 from config import settings
-from {{cookiecutter.module_name}}.authentication import RehiveAPIException
 
 
 logger = getLogger('django')
@@ -53,41 +52,31 @@ def custom_exception_handler(exc, context):
         if getattr(exc, 'wait', None):
             headers['Retry-After'] = '%d' % exc.wait
 
-        # Special handling Rehive API exceptions.
-        if isinstance(exc, RehiveAPIException):
-            if hasattr(exc, "data"):
-                data = OrderedDict([
-                    ('status', 'error'),
-                    ('message', exc.detail),
-                    ('data', exc.data)
-                ])
+        if isinstance(exc.detail, (list, dict)):
+            # Use the manually set message if it exists.
+            if hasattr(exc, "message"):
+                message = exc.message or ''
+            # Otherwise construct the message from the details.
             else:
-                data = OrderedDict([
-                    ('status', 'error'), ('message', exc.detail)
-                ])
+                message = ''
+                for key in exc.detail:
+                    try:
+                        if isinstance(exc.detail[key], str):
+                            message += exc.detail[key] + ' '
+                        else:
+                            for error in exc.detail[key]:
+                                # Exclude duplicates.
+                                if error not in message:
+                                    message += error + ' '
+                    except TypeError:
+                        if key == 'non_field_errors':
+                            message = exc.detail[key][0]
+                        else:
+                            message = _('Invalid request.')
 
-        elif isinstance(exc.detail, (list, dict)):
-            # Concatenate all field and non_field errors for message:
-            message = ''
-
-            for key in exc.detail:
-                try:
-                    if isinstance(exc.detail[key], str):
-                        message += exc.detail[key] + ' '
-                    else:
-                        for error in exc.detail[key]:
-                            # Don't include duplicates in universal error message
-                            if error not in message:
-                                message += error + ' '
-
-                except TypeError:
-                    if key == 'non_field_errors':
-                        message = exc.detail[key][0]
-                    else:
-                        message = _('Invalid request.')
-
-            if message.endswith(' '):
-                message = message[:-1] # remove last space
+                # Remove trailing whitespace.
+                if message.endswith(' '):
+                    message = message[:-1]
 
             data = OrderedDict([
                 ('status', 'error'), ('message', message), ('data', exc.detail)
