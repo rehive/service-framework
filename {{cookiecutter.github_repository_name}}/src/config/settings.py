@@ -73,6 +73,22 @@ MIDDLEWARE = [
 # ------------------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+# Cookie settings
+# ------------------------------------------------------------------------------
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# SSL
+# ------------------------------------------------------------------------------
+# Disabled : Rehive infrastructure handles the SSL redirects instead.
+# SECURE_SSL_REDIRECT = True
+
+# HSTS settings
+# ------------------------------------------------------------------------------
+# Disabled : Rehive infrastructure handles the HSTS headers instead.
+# SECURE_HSTS_SECONDS = 15768000
+# SECURE_HSTS_PRELOAD = True
+
 # CORS headers
 # ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
