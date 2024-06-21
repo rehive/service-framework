@@ -2,7 +2,7 @@ Django==4.1.13
 django-cors-headers==3.11.0
 django-filter==21.1
 djangorestframework==3.13.1
-gunicorn==20.1.0
+gunicorn==22.0.0
 psycopg2-binary==2.9.3
 rehive==1.2.19
 requests==2.31.0
