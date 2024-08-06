@@ -2,13 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 deployment:
-  replicaCount: 1
+  replicaCount: 3
   resources:
     requests:
       memory: 350M
       cpu: 10m
     limits:
-      memory: 2000M
+      memory: 750M
       cpu: 350m
   command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, uvicorn.workers.UvicornH11Worker, --pythonpath, src, config.asgi:application]
   args: null
