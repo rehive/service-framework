@@ -2,7 +2,7 @@
 import enumfields
 from django.db import migrations, models
 import django.db.models.deletion
-
+from {{cookiecutter.module_name}}.enums import CompanyMode
 
 class Migration(migrations.Migration):
 
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(default=True)),
                 ('mode', enumfields.fields.EnumField(
                     blank=True,
-                    enum={{cookiecutter.module_name}}.enums.CompanyMode,
+                    enum=CompanyMode,
                     max_length=10, null=True
                 ),)
             ],

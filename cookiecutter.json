@@ -7,12 +7,6 @@
     "github_repository_name": "{{ cookiecutter.app_name }}",
     "docker_image_staging": "gcr.io/rehive-services/{{cookiecutter.app_name}}",
     "docker_image_production": "gcr.io/rehive-services/{{cookiecutter.app_name}}",
-    "app_url_staging": "{{ cookiecutter.app_short_name }}.s.services.rehive.io",
-    "app_url_production": "{{ cookiecutter.app_short_name }}.services.rehive.io",
-    "server_infrastructure": [
-        "GCloud + Kubernetes",
-        "Heroku + TravisCI"
-    ],
     "_copy_without_render": [
         "*.html",
         "*acr.yaml"

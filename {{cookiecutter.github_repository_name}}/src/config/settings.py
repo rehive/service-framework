@@ -7,6 +7,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
 from logging import getLogger
+from pathlib import Path
+
 
 from .plugins.sentry import *
 from .plugins.secrets import *
@@ -24,8 +26,8 @@ logger = getLogger('django')
 # Project paths
 # ------------------------------------------------------------------------------
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
+BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_DIR = BASE_DIR.parent
 
 ALLOWED_HOSTS = ['*']
 
@@ -67,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 # AutoField
@@ -119,20 +122,9 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# ------------------------------------------------------------------------------
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
-STATIC_URL = '/static/'
-
-if os.environ.get('GCLOUD_USE_STATIC', '') == 'True':
-    STATIC_URL = 'https://storage.googleapis.com/' + os.environ.get('GCLOUD_STATIC_BUCKET') + '/'
-
-# STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_DIR, 'var/www/static')
-
-STATICFILES_DIRS = [
-    # os.path.join(PROJECT_DIR, "var/www/static"),
-    # '/var/www/static/',
-]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = 'static/'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files
 # ------------------------------------------------------------------------------

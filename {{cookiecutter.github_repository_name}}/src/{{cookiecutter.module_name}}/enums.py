@@ -1,5 +1,4 @@
-from enum import Enum
-
+from enumfields.enums import Enum
 
 class CompanyMode(Enum):
     TEST = 'test'

@@ -1,67 +1,59 @@
+# Default values for rehive-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 deployment:
-  command:
-  - gunicorn
-  - config.wsgi:application
-  args:
-    config: file:config/gunicorn.py
   replicaCount: 1
   resources:
     requests:
-      memory: 300M
-      cpu: 50m
+      memory: 350M
+      cpu: 10m
     limits:
-      memory: 1024Mi
-      cpu: 500m
+      memory: 2000M
+      cpu: 350m
+  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, uvicorn.workers.UvicornH11Worker, --pythonpath, src, config.asgi:application]
+  args: null
 image:
-  pullPolicy: IfNotPresent
   repository: {{ cookiecutter.docker_image_production }}
   tag: latest
-ingress:
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: 'true'
-  enabled: true
-  hosts:
-  - {{ cookiecutter.app_url_production }}
-  tls:
-  - hosts:
-    - {{ cookiecutter.app_url_production }}
-    secretName: {{cookiecutter.app_name}}-tls
-management:
-  enabled: false
-envFromSecret:
-  enabled: true
-  secretName: {{ cookiecutter.app_name }}
-postgres:
-  enabled: true
-  host: patroni-{{cookiecutter.app_name}}-patroni.{{cookiecutter.app_name}}.svc.cluster.local
-  port: "5432"
-  secret:
-    key: password-admin
-    name: patroni-{{cookiecutter.app_name}}-patroni
-  user: webapp
+  pullPolicy: IfNotPresent
 service:
+  name: {{cookiecutter.app_name}}
+  type: ClusterIP
   externalPort: 80
   internalPort: 8000
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: 8000
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 2
-  name: nginx
   readinessProbe:
     httpGet:
       path: /readiness
       port: 8000
     initialDelaySeconds: 10
-    periodSeconds: 10
     timeoutSeconds: 2
-  type: NodePort
+    periodSeconds: 10
+ingress:
+  enabled: false
+postgres:
+  enabled: true
+  host: 172.26.144.2
+  port: '5432'
+  db: {{cookiecutter.app_name}}
+  secret:
+    key: postgres-password
+    name: postgres
+  user: {{cookiecutter.app_name}}
 rabbitmq:
   enabled: false
+  host: mini-yellow-goose.in.rmq2.cloudamqp.com
+  user: scztisej
+  vhost: scztisej
+  port: 5672
+  secret:
+    name: rabbitmq
+    key: rabbitmq-password
 redis:
   enabled: false
+  host: 172.26.145.11
+  port: 6379
+  secret:
+    name: redis
+    key: redis-password
 workers:
   enabled: false
