@@ -33,42 +33,5 @@ def make_django_secret():
         _file.write(file_data)
 
 
-def remove_heroku_travis_files():
-    """
-    Remove associated Heroku and TravisCI files.
-    All k8s setup files are located in etc/
-    """
-    file_names = [
-        '.travis.yml', 'Procfile', 'docker-compose.yml', 'Dockerfile',
-        'postgres_ready.py'
-    ]
-    for file_name in file_names:
-        file_path = os.path.join(PROJECT_DIRECTORY, file_name)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            assert file_path not in os.listdir(PROJECT_DIRECTORY)
-
-
-def remove_gcould_k8s_files():
-    """
-    Move all files out of src/ to the PROJECT_DIR for heroku and travis
-    deployment setup.
-    """
-    shutil.rmtree(os.path.join(PROJECT_DIRECTORY, 'etc'))
-    assert 'src' in os.listdir(PROJECT_DIRECTORY)
-    src_dir = os.path.join(PROJECT_DIRECTORY, 'src')
-    files = os.listdir(src_dir)
-    for f in files:
-        shutil.move(os.path.join(src_dir, f), PROJECT_DIRECTORY)
-    assert 'manage.py' in os.listdir(PROJECT_DIRECTORY)
-    os.rmdir(src_dir)
-
-
 # Create django secret
 make_django_secret()
-
-# Check use travis
-if '{{cookiecutter.server_infrastructure}}' == 'Heroku + TravisCI':
-    remove_gcould_k8s_files()
-elif '{{cookiecutter.server_infrastructure}}' == 'GCloud + Kubernetes':
-    remove_heroku_travis_files()

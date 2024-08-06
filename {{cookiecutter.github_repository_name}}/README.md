@@ -15,9 +15,9 @@ Make sure you have the following installed
 
 If you are new to this, virtualenv with virtualenvwrapper is a straight forward
 and relatively simple was to use virtual environments.
-The [The Hitchhiker’s Guide to Python!](http://docs.python-guide.org/en/latest/) has a nice tutorial for setting up [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv) and [virtualenvwrapper](http://docs.python-guide.org/en/latest/dev/virtualenvs/#virtualenvwrapper)
+The [The Hitchhiker's Guide to Python!](http://docs.python-guide.org/en/latest/) has a nice tutorial for setting up [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv) and [virtualenvwrapper](http://docs.python-guide.org/en/latest/dev/virtualenvs/#virtualenvwrapper)
 
-Else, with conda:
+Else, with [conda](https://docs.conda.io/en/latest/):
 ```
 conda create -n service-test python=3.10
 ```
@@ -39,12 +39,7 @@ Run `docker ps` to make sure your container is running.
 python src/manage.py migrate
 ```
 
-**Setup all the static files**
-```
-python src/manage.py collectstatic
-```
-
-**Run the webserver to see if all is working**
+**Run the webserver to see if everything is working**
 ```
 python src/manage.py runserver
 ```
@@ -63,40 +58,8 @@ python src/manage.py manage.py runserver
 
 ## Deployments
 
-Deployements are automated using Travis CI, Heroku and gcloud.
-Pushes to the master branch will trigger a build via Travis. Once the build passes,
-Travis will deploy the branch to Heroku.
+### Initial setup
 
-- Make sure your project is on github
-  - Add the following file, if not already on github. It is excluded in the .gitignore file by default
-  ```
-  git add -f config/static/api/
-  ```
-- Sign up on (travis.org)[https://travis-ci.org/] if you repo is open source or
-(travis.com)[https://travis-ci.com/] for private repos
-- Sync your account
-- Turn on the switch for your repository
-- Sign up on (Heroku)[https://signup.heroku.com/]
-- Login and authenticate your heroku-cli so that you can use the heroku-cli to create our production app.
-```
-heroku login
-```
-- Run the following command locally to initialize your project
-```
-heroku create {{cookiecutter.github_repository_name}} --remote prod --region eu && \
-heroku addons:create heroku-postgresql:hobby-dev --app {{cookiecutter.github_repository_name}} && \
-heroku config:set \
-    DJANGO_SECRET=`openssl rand -base64 32` \
-    DJANGO_SETTINGS_MODULE="config.settings" \
-    --app {{cookiecutter.github_repository_name}}
-```
-- Encrypt your Heroky credentials and allow Travis to view them for deployments
-```
-travis encrypt HEROKU_AUTH_TOKEN="$(heroku auth:token)" --add
-```
-- Commit and push the changes to master to trigger the first build
-
-Google cloud:
 Install rdeploy
 ```
 pip install rdeploy
@@ -125,3 +88,13 @@ Install
 ```
 rdeploy install staging
 ```
+
+### Deploying
+
+Deploy to staging
+```
+deploy git-release patch staging
+rdeploy cloudbuild staging <tag>
+rdeploy upgrade staging <tag>
+```
+

@@ -1,57 +1,42 @@
 deployment:
-  command:
-  - gunicorn
-  - config.wsgi:application
-  args:
-    config: file:config/gunicorn.py
   replicaCount: 1
-  resources:
-envFromSecret:
-  enabled: true
-  secretName: {{ cookiecutter.app_name }}
+  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, uvicorn.workers.UvicornH11Worker, --pythonpath, src, config.asgi:application]
+  args: null
 image:
   pullPolicy: IfNotPresent
   repository: {{ cookiecutter.docker_image_staging }}
   tag: latest
-imagePullSecrets:
-  name: gcr-json-key
 ingress:
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: 'true'
-  enabled: true
-  hosts:
-  - {{ cookiecutter.app_url_staging }}
-  tls:
-  - hosts:
-    - {{ cookiecutter.app_url_staging }}
-    secretName: {{cookiecutter.app_name}}-tls
+  enabled: false
 postgres:
   enabled: true
-  host: patroni-{{cookiecutter.app_name}}-patroni.{{cookiecutter.app_name}}-staging.svc.cluster.local
+  host: 172.30.224.3
   port: 5432
+  db: {{cookiecutter.app_name}}
   secret:
-    key: password-admin
-    name: patroni-{{cookiecutter.app_name}}-patroni
-  user: webapp
+    key: postgres-password
+    name: postgres
+  user: {{cookiecutter.app_name}}
 rabbitmq:
-  enabled: false
-  host: rabbitmq-ha-{{cookiecutter.app_name}}.{{cookiecutter.app_name}}-staging.svc.cluster.local
+  enabled: true
+  host: advanced-azure-ladybird.in.rmq2.cloudamqp.com
+  user: sxclzvgq
+  vhost: sxclzvgq
   port: 5672
   secret:
-    name: rabbitmq-ha-{{cookiecutter.app_name}}
+    name: rabbitmq
     key: rabbitmq-password
+redis:
+  enabled: true
+  host: 172.30.225.3
+  port: 6379
+  secret:
+    name: redis
+    key: redis-password
 service:
   externalPort: 80
   internalPort: 8000
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: 8000
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 2
-  name: nginx
+  name: service-arb
   readinessProbe:
     httpGet:
       path: /readiness
@@ -59,8 +44,6 @@ service:
     initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 2
-  type: NodePort
-management:
-  enabled: false
+  type: ClusterIP
 workers:
-  enabled: false
+  enabled: true
