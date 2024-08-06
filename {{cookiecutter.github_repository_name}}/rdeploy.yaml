@@ -1,34 +1,32 @@
-version: '2'
+version: '3'
 configs:
-  staging:
-    project_name: {{cookiecutter.app_name}}
-    docker_image: {{ cookiecutter.docker_image_staging }}
-    cloud_provider:
-      name: azure
-      subscription_id: 57800aa9-e115-4ede-9b70-0e1ce97294f6
-      resource_group: rehive-services-staging
-      region: westeurope
-      kube_cluster: rehive-services-staging
-      container_registry: rehiveservices
-    namespace: {{cookiecutter.app_name}}-staging
-    helm_values_path: ./etc/helm/staging/values.yaml
-    helm_chart: rehive/rehive-service
-    helm_chart_version: 0.2.3
-    helm_version: 3.1.1
-    use_system_helm: false
-    container_registry_provider: google
   production:
     project_name: {{cookiecutter.app_name}}
-    docker_image: {{ cookiecutter.docker_image_production }}
+    docker_image: {{cookiecutter.docker_image_production}}
+    kube_context: gke_rehive-services_europe-west4_production3
     cloud_provider:
       name: gcp
       project: rehive-services
-      kube_cluster: production
-      zone: europe-west1-c
+      region: europe-west4
+      helm_registry: europe-west4-docker.pkg.dev
     namespace: {{cookiecutter.app_name}}
     helm_values_path: ./etc/helm/production/values.yaml
-    helm_chart: rehive/rehive-service
-    helm_chart_version: 0.2.2
-    helm_version: 3.1.1
+    helm_chart: rehive-helm-charts/rehive-service
+    helm_chart_version: 1.1.3
+    helm_version: 3.14.0
     use_system_helm: false
-    container_registry_provider: google
+  staging:
+    project_name: {{cookiecutter.app_name}}
+    docker_image: {{cookiecutter.docker_image_staging}}
+    kube_context: gke_rehive-services_europe-west4_staging3
+    cloud_provider:
+      name: gcp
+      project: rehive-services
+      region: europe-west4
+      helm_registry: europe-west4-docker.pkg.dev
+    namespace: {{cookiecutter.app_name}}-staging
+    helm_values_path: ./etc/helm/staging/values.yaml
+    helm_chart: rehive-helm-charts/rehive-service
+    helm_chart_version: 1.1.3
+    helm_version: 3.14.0
+    use_system_helm: false

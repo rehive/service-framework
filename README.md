@@ -4,23 +4,6 @@
   <p align="center">A framework that can be used as a base to build services on Rehive</p>
 </p>
 
-
-## Features
-
-- Python 3.10
-- Django 4.0.1
-- [Django Rest Framework](http://www.django-rest-framework.org/) integration
-- PostgreSQL 13.0
-- Running in a self-contained [Docker](https://www.docker.com/) containers
-- Automatic deployments to Heroku using Travis CI
-
-**Notes:**
-- The service framework has been set up to work with Travis CI and Heroku for automatic
-deployments. Travis CI is not a requirement for deployments to Heroku to work and is used 
-as a method of automation.
-- If you choose not to use Heroku, you will have to set up deployments yourself.
- 
-
 ## Getting started
 
 Install [cookiecutter](https://github.com/audreyr/cookiecutter). Further documentation for installation can be found [here](https://cookiecutter.readthedocs.io/en/latest/installation.html#install-cookiecutter).
