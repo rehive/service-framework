@@ -37,7 +37,7 @@ The **{{cookiecutter.project_name}} API**.
         name='swagger-ui'
     ),
     re_path(
-        r'^/?$',
+        r'^$',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc-ui'
     ),
