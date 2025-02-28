@@ -67,9 +67,10 @@ class RehiveAuthentication(HeaderAuthentication):
 
         # Raise the error as is, if it has un unexpected error status.
         if (not status_code or status_code not in (
+                    status.HTTP_429_TOO_MANY_REQUESTS,
                     status.HTTP_400_BAD_REQUEST,
-                    status.HTTP_401_UNAUTHORIZED,
                     status.HTTP_403_FORBIDDEN,
+                    status.HTTP_401_UNAUTHORIZED,
                 )):
             raise exc
 
