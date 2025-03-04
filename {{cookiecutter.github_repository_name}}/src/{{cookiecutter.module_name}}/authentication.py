@@ -74,12 +74,22 @@ class RehiveAuthentication(HeaderAuthentication):
                 )):
             raise exc
 
-        # Otherwise try and get the data and message from the error.
+        # Handle 429 throttling errors.
+        if status_code == status.HTTP_429_TOO_MANY_REQUESTS:
+            try:
+                wait = int(exc.result.headers['Retry-After'])
+            except (AttributeError, TypeError, KeyError):
+                pass
+            else:
+                raise exceptions.Throttled(wait=wait)
+
+        # Otherwise try and get data from the exception (if it exists).
         try:
             data = exc.data['data']
         except (AttributeError, TypeError, KeyError):
             data = None
 
+        # Otherwise try and get a message from the exception (if it exists).
         try:
             message = exc.data['message']
         except (AttributeError, TypeError, KeyError):
