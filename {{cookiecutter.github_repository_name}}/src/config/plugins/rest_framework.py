@@ -14,6 +14,7 @@ REST_FRAMEWORK = {
     ),
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'drf_rehive_extras.schema.BaseAutoSchema',
+    'NUM_PROXIES': 2,
 }
 
 reload_api_settings(setting='REST_FRAMEWORK', value=REST_FRAMEWORK)
