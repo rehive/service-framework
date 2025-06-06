@@ -1,5 +1,6 @@
 import uuid
 
+from rest_framework.settings import api_settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import smart_str
 from rest_framework import authentication, exceptions, status
@@ -55,6 +56,32 @@ class RehiveAuthentication(HeaderAuthentication):
     authorization header belongs to a valid user.
     """
 
+    def _get_request_ips(self, request):
+        """
+        Identify the machine making the request.
+        """
+
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        remote_addr = request.META.get('REMOTE_ADDR')
+        num_proxies = api_settings.NUM_PROXIES
+
+        # List of IPs.
+        ips = []
+
+        # If an X-Forwarded-For exists then use it to populate the IP list.
+        if x_forwarded_for:
+            ips = x_forwarded_for.split(',')
+            # Remove the number of proxies from the end of the list.
+            if num_proxies:
+                ips = ips[:len(ips)-num_proxies]
+
+        # If the IP list is empty after getting the IPs from the X_FORWARED_FOR (and
+        # removing proxies), then use the REMOTE_ADDR instead.
+        if not ips:
+            ips = [remote_addr]
+
+        return ips
+
     def _raise_exception(self, exc):
         """
         Raise a custom exception for authentication/authorization.
@@ -101,6 +128,7 @@ class RehiveAuthentication(HeaderAuthentication):
         )
 
     def authenticate(self, request):
+        ips = self._get_request_ips(request)
         token = self.get_auth_header(request)
         rehive = Rehive(token)
 
@@ -108,7 +136,9 @@ class RehiveAuthentication(HeaderAuthentication):
             raise exceptions.NotAuthenticated()
 
         try:
-            platform_user = rehive.auth.get()
+            platform_user = rehive.auth.get(
+                headers={"X-Forwarded-For": ", ".join(ips)}
+            )
         except APIException as exc:
             self._raise_exception(exc)
 
