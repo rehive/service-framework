@@ -10,7 +10,7 @@ deployment:
     limits:
       memory: 750M
       cpu: 350m
-  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, uvicorn.workers.UvicornH11Worker, --pythonpath, src, config.asgi:application]
+  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, config.workers.UvicornWorker, --pythonpath, src, config.asgi:application]
   args: null
 image:
   repository: {{ cookiecutter.docker_image_production }}
@@ -34,13 +34,14 @@ postgres:
   enabled: true
   host: 172.26.144.2
   port: '5432'
-  db: {{cookiecutter.app_name}}
+  db: {{cookiecutter.module_name}}
   secret:
     key: postgres-password
     name: postgres
-  user: {{cookiecutter.app_name}}
+  user: {{cookiecutter.module_name}}
+{% if cookiecutter.use_celery == "yes" -%}
 rabbitmq:
-  enabled: false
+  enabled: true
   host: mini-yellow-goose.in.rmq2.cloudamqp.com
   user: scztisej
   vhost: scztisej
@@ -48,12 +49,53 @@ rabbitmq:
   secret:
     name: rabbitmq
     key: rabbitmq-password
+{%- else -%}
+rabbitmq:
+  enabled: false
+{%- endif %}
 redis:
   enabled: false
-  host: 172.26.145.11
-  port: 6379
-  secret:
-    name: redis
-    key: redis-password
+{% if cookiecutter.use_celery == "yes" -%}
+workers:
+  enabled: true
+  deployments:
+  - name: worker-general
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, general-{{cookiecutter.app_name}}]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+  - name: worker-platform-webhooks
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, platform-webhook-{{cookiecutter.app_name}}]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+  - name: scheduler
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --beat, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, dummy-queue-{{cookiecutter.app_name}}]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+{%- else -%}
 workers:
   enabled: false
+{%- endif %}

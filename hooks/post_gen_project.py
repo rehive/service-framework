@@ -6,6 +6,8 @@ import shutil
 
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 
+USE_CELERY = "{{ cookiecutter.use_celery }}" == "yes"
+
 
 def remove_files(file_names):
     for file_name in file_names:
@@ -35,3 +37,11 @@ def make_django_secret():
 
 # Create django secret
 make_django_secret()
+
+# Strip Celery scaffolding when not enabled
+if not USE_CELERY:
+    remove_files([
+        "src/config/celery.py",
+        "src/config/plugins/tasks.py",
+        "src/{{ cookiecutter.module_name }}/tasks.py",
+    ])

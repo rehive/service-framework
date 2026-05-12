@@ -1,6 +1,6 @@
 deployment:
   replicaCount: 1
-  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, uvicorn.workers.UvicornH11Worker, --pythonpath, src, config.asgi:application]
+  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, config.workers.UvicornWorker, --pythonpath, src, config.asgi:application]
   args: null
 image:
   pullPolicy: IfNotPresent
@@ -12,11 +12,12 @@ postgres:
   enabled: true
   host: 172.30.224.3
   port: 5432
-  db: {{cookiecutter.app_name}}
+  db: {{cookiecutter.module_name}}
   secret:
     key: postgres-password
     name: postgres
-  user: {{cookiecutter.app_name}}
+  user: {{cookiecutter.module_name}}
+{% if cookiecutter.use_celery == "yes" -%}
 rabbitmq:
   enabled: true
   host: advanced-azure-ladybird.in.rmq2.cloudamqp.com
@@ -26,17 +27,16 @@ rabbitmq:
   secret:
     name: rabbitmq
     key: rabbitmq-password
+{%- else -%}
+rabbitmq:
+  enabled: false
+{%- endif %}
 redis:
-  enabled: true
-  host: 172.30.225.3
-  port: 6379
-  secret:
-    name: redis
-    key: redis-password
+  enabled: false
 service:
   externalPort: 80
   internalPort: 8000
-  name: service-arb
+  name: {{cookiecutter.app_name}}
   readinessProbe:
     httpGet:
       path: /readiness
@@ -45,5 +45,47 @@ service:
     periodSeconds: 10
     timeoutSeconds: 2
   type: ClusterIP
+{% if cookiecutter.use_celery == "yes" -%}
 workers:
   enabled: true
+  deployments:
+  - name: worker-general
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, general-{{cookiecutter.app_name}}-staging]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+  - name: worker-platform-webhooks
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, platform-webhook-{{cookiecutter.app_name}}-staging]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+  - name: scheduler
+    internalPort: 8000
+    replicaCount: 1
+    command: [celery, -A, config.celery, worker, --beat, --loglevel=INFO, --concurrency=1,
+      --without-gossip, --without-mingle, --without-heartbeat, -Q, dummy-queue-{{cookiecutter.app_name}}-staging]
+    resources:
+      requests:
+        cpu: 50m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+{%- else -%}
+workers:
+  enabled: false
+{%- endif %}

@@ -1,0 +1,56 @@
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: {{ cookiecutter.app_name }}-external
+  namespace: {{ cookiecutter.app_name }}
+  labels:
+    gateway: external-http
+spec:
+  parentRefs:
+  - name: external-http
+    namespace: gateway
+  hostnames:
+  - "{{ cookiecutter.app_short_name }}.services.rehive.io"
+  - "{{ cookiecutter.app_short_name }}.services.rehive.com"
+  rules:
+  - matches:
+    - path:
+        value: /
+    backendRefs:
+    - name: {{ cookiecutter.app_name }}
+      port: 80
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ cookiecutter.app_name }}-health
+  namespace: {{ cookiecutter.app_name }}
+spec:
+  default:
+    logConfig:
+      enabled: true
+    config:
+      type: HTTP
+      httpHealthCheck:
+        requestPath: /readiness
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ cookiecutter.app_name }}
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: cloud-armor-policy
+  namespace: {{ cookiecutter.app_name }}
+spec:
+  default:
+    securityPolicy: rehive-core
+    logging:
+      enabled: true
+      sampleRate: 1000000
+    timeoutSec: 60
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ cookiecutter.app_name }}
