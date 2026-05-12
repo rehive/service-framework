@@ -9,6 +9,7 @@ import os
 from logging import getLogger
 from pathlib import Path
 
+from corsheaders.defaults import default_headers
 
 from .plugins.sentry import *
 from .plugins.secrets import *
@@ -17,6 +18,9 @@ from .plugins.spectacular import *
 from .plugins.database import *
 from .plugins.gcloud_bucket import *
 from .plugins.healthz import *
+{% if cookiecutter.use_celery == "yes" -%}
+from .plugins.tasks import *
+{%- endif %}
 
 
 # LOGGING
@@ -96,6 +100,11 @@ CSRF_COOKIE_SECURE = True
 # ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "SessionId",
+)
+
 # Password validation
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -116,8 +125,6 @@ LANGUAGE_CODE = 'en'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = True
 
@@ -179,6 +186,8 @@ SITE_ID = 1
 FIXTURE_DIRS = ['config/fixtures']
 
 CACHE_DIR = os.path.join(PROJECT_DIR, 'var/cache')
+
+APPEND_SLASH = False
 
 # Docs
 # ------------------------------------------------------------------------------

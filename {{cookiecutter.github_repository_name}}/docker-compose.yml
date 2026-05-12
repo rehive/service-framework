@@ -1,26 +1,20 @@
-version: '3'
-
 services:
   postgres:
-    image: postgres
-    environment:
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - .:/postgres
-    ports:
-      - ${LOCAL_POSTGRES_PORT_RANGE}
-  web:
+    image: postgres:14
     restart: always
-    build: ./
-    image: web
     environment:
-      - DJANGO_SECRET=local
-      - REHIVE_API_URL=https://api.rehive.com/3/
-      - LOCAL_POSTGRES_HOST=postgres
-    command: python3 manage.py runserver 0.0.0.0:8080
-    volumes:
-      - .:/code
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+{% if cookiecutter.use_celery == "yes" %}
+  rabbitmq:
+    image: rabbitmq:3
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+{% endif %}
+volumes:
+  pgdata:
+    driver: local
