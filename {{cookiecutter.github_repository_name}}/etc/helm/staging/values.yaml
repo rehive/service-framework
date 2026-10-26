@@ -1,6 +1,6 @@
 deployment:
   replicaCount: 1
-  command: [gunicorn, --bind, 0.0.0.0:8000, --workers, '4', --worker-class, config.workers.UvicornWorker, --pythonpath, src, config.asgi:application]
+  command: [gunicorn, config.wsgi:application, --config, file:config/gunicorn.py]
   args: null
 image:
   pullPolicy: IfNotPresent
@@ -76,6 +76,9 @@ workers:
   - name: scheduler
     internalPort: 8000
     replicaCount: 1
+    # celery beat: never run two schedulers during a rollout.
+    strategy:
+      type: Recreate
     command: [celery, -A, config.celery, worker, --beat, --loglevel=INFO, --concurrency=1,
       --without-gossip, --without-mingle, --without-heartbeat, -Q, dummy-queue-{{cookiecutter.app_name}}-staging]
     resources:

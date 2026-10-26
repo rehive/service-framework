@@ -19,7 +19,7 @@ The [The Hitchhiker's Guide to Python!](http://docs.python-guide.org/en/latest/)
 
 Else, with [conda](https://docs.conda.io/en/latest/):
 ```
-conda create -n service-test python=3.10
+conda create -n service-test python=3.13
 ```
 
 **Install requirements**
