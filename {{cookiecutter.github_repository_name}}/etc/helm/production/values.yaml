@@ -32,7 +32,7 @@ ingress:
   enabled: false
 postgres:
   enabled: true
-  host: 172.26.144.2
+  host: services.postgres.production.rehive.internal
   port: '5432'
   db: {{cookiecutter.module_name}}
   secret:
