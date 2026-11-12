@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.flatpages',
     'django.contrib.sites',
+    'django.contrib.postgres',
 
     'corsheaders',
     'rest_framework',
